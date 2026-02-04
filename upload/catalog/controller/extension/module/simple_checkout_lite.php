@@ -37,7 +37,6 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $this->load->language('extension/module/simple_checkout_lite');
 
         $this->document->setTitle($this->language->get('heading_title'));
-        $this->document->addScript('catalog/view/javascript/simple_checkout_lite.js');
 
         $data['breadcrumbs'] = array();
         $data['breadcrumbs'][] = array(
@@ -165,8 +164,9 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         $data['agree'] = $this->config->get('config_checkout_id');
 
-        $data['column_left'] = $this->load->controller('common/column_left');
-        $data['column_right'] = $this->load->controller('common/column_right');
+        // No sidebars for checkout - full width layout
+        $data['column_left'] = '';
+        $data['column_right'] = '';
         $data['content_top'] = $this->load->controller('common/content_top');
         $data['content_bottom'] = $this->load->controller('common/content_bottom');
         $data['footer'] = $this->load->controller('common/footer');
@@ -401,95 +401,108 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
     public function payment() {
         $json = array();
 
-        $this->load->language('checkout/checkout');
+        try {
+            $this->load->language('checkout/checkout');
 
-        if (!isset($this->session->data['payment_address'])) {
-            $json['error'] = $this->language->get('error_address');
-        }
-
-        // Check if shipping is required and set
-        if ($this->cart->hasShipping() && !isset($this->session->data['shipping_method'])) {
-            $json['error'] = $this->language->get('error_shipping');
-        }
-
-        if (!isset($json['error'])) {
-            // Totals
-            $totals = array();
-            $taxes = $this->cart->getTaxes();
-            $total = 0;
-
-            $this->load->model('setting/extension');
-
-            $sort_order = array();
-
-            $results = $this->model_setting_extension->getExtensions('total');
-
-            foreach ($results as $key => $value) {
-                $sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
+            if (!isset($this->session->data['payment_address'])) {
+                $json['error'] = $this->language->get('error_address');
             }
 
-            array_multisort($sort_order, SORT_ASC, $results);
+            // Check if shipping is required and set
+            if ($this->cart->hasShipping() && !isset($this->session->data['shipping_method'])) {
+                $json['error'] = $this->language->get('error_shipping');
+            }
 
-            foreach ($results as $result) {
-                if ($this->config->get('total_' . $result['code'] . '_status')) {
-                    $this->load->model('extension/total/' . $result['code']);
+            if (!isset($json['error'])) {
+                // Totals
+                $totals = array();
+                $taxes = $this->cart->getTaxes();
+                $total = 0;
 
-                    $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                $this->load->model('setting/extension');
+
+                $sort_order = array();
+
+                $results = $this->model_setting_extension->getExtensions('total');
+
+                foreach ($results as $key => $value) {
+                    $sort_order[$key] = $this->config->get('total_' . $value['code'] . '_sort_order');
                 }
-            }
 
-            // Payment Methods
-            $method_data = array();
+                array_multisort($sort_order, SORT_ASC, $results);
 
-            $results = $this->model_setting_extension->getExtensions('payment');
-
-            $recurring = $this->cart->hasRecurringProducts();
-
-            foreach ($results as $result) {
-                if ($this->config->get('payment_' . $result['code'] . '_status')) {
-                    $this->load->model('extension/payment/' . $result['code']);
-
-                    $method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
-
-                    if ($method) {
-                        if ($recurring) {
-                            if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
-                                $method_data[$result['code']] = $method;
-                            }
-                        } else {
-                            $method_data[$result['code']] = $method;
+                foreach ($results as $result) {
+                    if ($this->config->get('total_' . $result['code'] . '_status')) {
+                        try {
+                            $this->load->model('extension/total/' . $result['code']);
+                            $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                        } catch (Exception $e) {
+                            // Skip this total if error
                         }
                     }
                 }
-            }
 
-            $sort_order = array();
+                // Payment Methods
+                $method_data = array();
 
-            foreach ($method_data as $key => $value) {
-                $sort_order[$key] = $value['sort_order'];
-            }
+                $results = $this->model_setting_extension->getExtensions('payment');
 
-            array_multisort($sort_order, SORT_ASC, $method_data);
+                $recurring = $this->cart->hasRecurringProducts();
 
-            $this->session->data['payment_methods'] = $method_data;
+                foreach ($results as $result) {
+                    if ($this->config->get('payment_' . $result['code'] . '_status')) {
+                        try {
+                            $this->load->model('extension/payment/' . $result['code']);
 
-            $json['payment_methods'] = $method_data;
+                            $method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
 
-            // Auto-select default or first payment method
-            $default_payment = $this->config->get('module_simple_checkout_lite_payment_default');
-            if ($default_payment && isset($method_data[$default_payment])) {
-                $this->session->data['payment_method'] = $method_data[$default_payment];
-                $json['payment_selected'] = $default_payment;
-            } elseif ($method_data) {
-                foreach ($method_data as $code => $method) {
-                    $this->session->data['payment_method'] = $method;
-                    $json['payment_selected'] = $code;
-                    break;
+                            if ($method) {
+                                if ($recurring) {
+                                    if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
+                                        $method_data[$result['code']] = $method;
+                                    }
+                                } else {
+                                    $method_data[$result['code']] = $method;
+                                }
+                            }
+                        } catch (Exception $e) {
+                            // Skip this payment method if error
+                        }
+                    }
                 }
-            }
 
-            // Get totals HTML
-            $json['totals'] = $this->getTotalsHtml();
+                if ($method_data) {
+                    $sort_order = array();
+
+                    foreach ($method_data as $key => $value) {
+                        $sort_order[$key] = $value['sort_order'];
+                    }
+
+                    array_multisort($sort_order, SORT_ASC, $method_data);
+                }
+
+                $this->session->data['payment_methods'] = $method_data;
+
+                $json['payment_methods'] = $method_data;
+
+                // Auto-select default or first payment method
+                $default_payment = $this->config->get('module_simple_checkout_lite_payment_default');
+                if ($default_payment && isset($method_data[$default_payment])) {
+                    $this->session->data['payment_method'] = $method_data[$default_payment];
+                    $json['payment_selected'] = $default_payment;
+                } elseif ($method_data) {
+                    foreach ($method_data as $code => $method) {
+                        $this->session->data['payment_method'] = $method;
+                        $json['payment_selected'] = $code;
+                        break;
+                    }
+                }
+
+                // Get totals HTML
+                $json['totals'] = $this->getTotalsHtml();
+            }
+        } catch (Exception $e) {
+            $json['error'] = 'Error: ' . $e->getMessage();
         }
 
         $this->response->addHeader('Content-Type: application/json');
@@ -930,6 +943,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $taxes = $this->cart->getTaxes();
         $total = 0;
 
+        // Make sure currency is set
+        if (!isset($this->session->data['currency'])) {
+            $this->session->data['currency'] = $this->config->get('config_currency');
+        }
+
         $this->load->model('setting/extension');
 
         $sort_order = array();
@@ -944,10 +962,39 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         foreach ($results as $result) {
             if ($this->config->get('total_' . $result['code'] . '_status')) {
-                $this->load->model('extension/total/' . $result['code']);
-
-                $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                try {
+                    $this->load->model('extension/total/' . $result['code']);
+                    $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                } catch (Exception $e) {
+                    // Skip
+                }
             }
+        }
+
+        // If no totals from extensions, calculate basic totals
+        if (empty($totals)) {
+            $totals[] = array(
+                'code'       => 'sub_total',
+                'title'      => $this->language->get('text_sub_total'),
+                'value'      => $this->cart->getSubTotal(),
+                'sort_order' => 1
+            );
+
+            if (isset($this->session->data['shipping_method'])) {
+                $totals[] = array(
+                    'code'       => 'shipping',
+                    'title'      => $this->session->data['shipping_method']['title'],
+                    'value'      => $this->session->data['shipping_method']['cost'],
+                    'sort_order' => 3
+                );
+            }
+
+            $totals[] = array(
+                'code'       => 'total',
+                'title'      => $this->language->get('text_total'),
+                'value'      => $this->cart->getTotal(),
+                'sort_order' => 9
+            );
         }
 
         $sort_order = array();
@@ -959,10 +1006,10 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         array_multisort($sort_order, SORT_ASC, $totals);
 
         $data = array();
-        foreach ($totals as $total) {
+        foreach ($totals as $total_row) {
             $data[] = array(
-                'title' => $total['title'],
-                'text'  => $this->currency->format($total['value'], $this->session->data['currency'])
+                'title' => $total_row['title'],
+                'text'  => $this->currency->format($total_row['value'], $this->session->data['currency'])
             );
         }
 

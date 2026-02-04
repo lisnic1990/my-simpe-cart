@@ -1,19 +1,269 @@
 {{ header }}
-<div id="checkout-checkout" class="container">
+<style>
+/* Hide sidebar menu on checkout page */
+#checkout-checkout .aside-menu,
+#checkout-checkout #column-left,
+#checkout-checkout #column-right,
+#checkout-checkout .sidebar-menu,
+#checkout-checkout .account-menu,
+.simple-checkout-page #column-left,
+.simple-checkout-page #column-right,
+.simple-checkout-page .aside-menu {
+  display: none !important;
+}
+
+/* Simple Checkout Lite - Unishop2 Free Theme Styles */
+.simple-checkout-wrapper {
+  margin-bottom: 30px;
+}
+
+.checkout-section {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.checkout-section-header {
+  background: #f8f8f8;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  border-radius: 4px 4px 0 0;
+}
+
+.checkout-section-icon {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.checkout-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.checkout-section-body {
+  padding: 20px;
+}
+
+.checkout-section .form-group {
+  margin-bottom: 15px;
+}
+
+.checkout-section .form-group label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.checkout-section .form-control {
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  height: auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.checkout-section .form-control:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.checkout-section .form-group.has-error .form-control {
+  border-color: #f44336;
+}
+
+.checkout-section .form-group.has-error .field-error,
+.checkout-section .text-danger {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.checkout-section .required label:before {
+  content: '* ';
+  color: #f44336;
+}
+
+/* Custom checkbox for unishop2 */
+.custom-checkbox label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.custom-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox .checkbox-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  margin-right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon:after {
+  content: '\f00c';
+  font-family: FontAwesome;
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Shipping and Payment methods */
+.shipping-methods-list .radio,
+.payment-methods-list .radio {
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.shipping-methods-list .radio:hover,
+.payment-methods-list .radio:hover {
+  border-color: #4CAF50;
+  background: #f9fff9;
+}
+
+.shipping-methods-list .radio label,
+.payment-methods-list .radio label {
+  font-weight: normal;
+  cursor: pointer;
+  display: block;
+}
+
+.shipping-methods-list .radio input[type="radio"],
+.payment-methods-list .radio input[type="radio"] {
+  margin-right: 10px;
+}
+
+.loading-placeholder {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+/* Sidebar */
+.checkout-sidebar {
+  position: sticky;
+  top: 20px;
+}
+
+.table-totals {
+  margin-bottom: 0;
+}
+
+.table-totals td {
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+
+.table-totals tr:first-child td {
+  border-top: none;
+}
+
+.table-totals tr:last-child td {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.checkout-agree {
+  padding: 15px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.btn-checkout {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  font-size: 16px;
+  padding: 15px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+  color: #fff;
+}
+
+.btn-checkout:hover,
+.btn-checkout:focus {
+  background: #43a047;
+  border-color: #43a047;
+  color: #fff;
+}
+
+.btn-checkout:disabled {
+  background: #ccc;
+  border-color: #ccc;
+}
+
+/* Alert styles */
+.checkout-section .alert {
+  margin-bottom: 0;
+  border-radius: 4px;
+}
+
+/* Mobile responsive */
+@media (max-width: 991px) {
+  .checkout-sidebar {
+    position: static;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .checkout-section-body {
+    padding: 15px;
+  }
+
+  .checkout-section-header {
+    padding: 12px 15px;
+  }
+
+  .checkout-section-title {
+    font-size: 14px;
+  }
+
+  .btn-checkout {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+}
+</style>
+
+<div id="checkout-checkout" class="container simple-checkout-page">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
     <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
     {% endfor %}
   </ul>
-  <div class="row">{{ column_left }}
-    {% if column_left and column_right %}
-    {% set class = 'col-sm-6' %}
-    {% elseif column_left or column_right %}
-    {% set class = 'col-sm-9' %}
-    {% else %}
-    {% set class = 'col-sm-12' %}
-    {% endif %}
-    <div id="content" class="{{ class }}">{{ content_top }}
+  <div class="row">
+    <div id="content" class="col-sm-12">{{ content_top }}
       <h1 class="heading-title">{{ heading_title }}</h1>
 
       <div id="simple-checkout-lite" class="simple-checkout-wrapper">
@@ -290,265 +540,351 @@
       </div>
 
       {{ content_bottom }}</div>
-    {{ column_right }}</div>
+  </div>
 </div>
 
-<style>
-/* Simple Checkout Lite - Unishop2 Free Theme Styles */
-.simple-checkout-wrapper {
-  margin-bottom: 30px;
-}
-
-.checkout-section {
-  background: #fff;
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-
-.checkout-section-header {
-  background: #f8f8f8;
-  padding: 15px 20px;
-  border-bottom: 1px solid #e5e5e5;
-  border-radius: 4px 4px 0 0;
-}
-
-.checkout-section-icon {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  line-height: 30px;
-  text-align: center;
-  background: #4CAF50;
-  color: #fff;
-  border-radius: 50%;
-  margin-right: 10px;
-  font-size: 14px;
-}
-
-.checkout-section-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-}
-
-.checkout-section-body {
-  padding: 20px;
-}
-
-.checkout-section .form-group {
-  margin-bottom: 15px;
-}
-
-.checkout-section .form-group label {
-  font-weight: 500;
-  color: #555;
-  margin-bottom: 5px;
-}
-
-.checkout-section .form-control {
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  padding: 10px 15px;
-  height: auto;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.checkout-section .form-control:focus {
-  border-color: #4CAF50;
-  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
-}
-
-.checkout-section .form-group.has-error .form-control {
-  border-color: #f44336;
-}
-
-.checkout-section .form-group.has-error .field-error,
-.checkout-section .text-danger {
-  color: #f44336;
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-.checkout-section .required label:before {
-  content: '* ';
-  color: #f44336;
-}
-
-/* Custom checkbox for unishop2 */
-.custom-checkbox label {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-weight: normal;
-}
-
-.custom-checkbox input[type="checkbox"] {
-  display: none;
-}
-
-.custom-checkbox .checkbox-icon {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ddd;
-  border-radius: 3px;
-  margin-right: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-
-.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon {
-  background: #4CAF50;
-  border-color: #4CAF50;
-}
-
-.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon:after {
-  content: '\f00c';
-  font-family: FontAwesome;
-  color: #fff;
-  font-size: 12px;
-}
-
-/* Shipping and Payment methods */
-.shipping-methods-list .radio,
-.payment-methods-list .radio {
-  margin: 0;
-  padding: 12px 15px;
-  border: 1px solid #eee;
-  border-radius: 4px;
-  margin-bottom: 10px;
-  transition: all 0.2s;
-}
-
-.shipping-methods-list .radio:hover,
-.payment-methods-list .radio:hover {
-  border-color: #4CAF50;
-  background: #f9fff9;
-}
-
-.shipping-methods-list .radio label,
-.payment-methods-list .radio label {
-  font-weight: normal;
-  cursor: pointer;
-  display: block;
-}
-
-.shipping-methods-list .radio input[type="radio"],
-.payment-methods-list .radio input[type="radio"] {
-  margin-right: 10px;
-}
-
-.loading-placeholder {
-  text-align: center;
-  padding: 20px;
-  color: #999;
-}
-
-/* Sidebar */
-.checkout-sidebar {
-  position: sticky;
-  top: 20px;
-}
-
-.table-totals {
-  margin-bottom: 0;
-}
-
-.table-totals td {
-  padding: 10px 0;
-  border-top: 1px solid #eee;
-}
-
-.table-totals tr:first-child td {
-  border-top: none;
-}
-
-.table-totals tr:last-child td {
-  font-size: 18px;
-  font-weight: 600;
-  color: #4CAF50;
-}
-
-.checkout-agree {
-  padding: 15px;
-  background: #f8f8f8;
-  border-radius: 4px;
-  margin-bottom: 15px;
-}
-
-.btn-checkout {
-  background: #4CAF50;
-  border-color: #4CAF50;
-  font-size: 16px;
-  padding: 15px 30px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  transition: all 0.3s;
-}
-
-.btn-checkout:hover,
-.btn-checkout:focus {
-  background: #43a047;
-  border-color: #43a047;
-}
-
-.btn-checkout:disabled {
-  background: #ccc;
-  border-color: #ccc;
-}
-
-/* Alert styles */
-.checkout-section .alert {
-  margin-bottom: 0;
-  border-radius: 4px;
-}
-
-/* Mobile responsive */
-@media (max-width: 991px) {
-  .checkout-sidebar {
-    position: static;
-    margin-top: 20px;
-  }
-}
-
-@media (max-width: 767px) {
-  .checkout-section-body {
-    padding: 15px;
-  }
-
-  .checkout-section-header {
-    padding: 12px 15px;
-  }
-
-  .checkout-section-title {
-    font-size: 14px;
-  }
-
-  .btn-checkout {
-    font-size: 14px;
-    padding: 12px 20px;
-  }
-}
-</style>
-
 <script type="text/javascript">
-var SimpleCheckoutLite = {
-  urls: {
-    save: '{{ action_save }}',
-    shipping: '{{ action_shipping }}',
-    payment: '{{ action_payment }}',
-    confirm: '{{ action_confirm }}',
-    zone: '{{ action_zone }}'
-  },
-  shipping_required: {{ shipping_required ? 'true' : 'false' }},
-  show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
-  show_payment_method: {{ show_payment_method ? 'true' : 'false' }},
-  shipping_default: '{{ shipping_default }}',
-  payment_default: '{{ payment_default }}'
-};
+(function($) {
+    'use strict';
+
+    var SimpleCheckoutLite = {
+        urls: {
+            save: '{{ action_save }}',
+            shipping: '{{ action_shipping }}',
+            payment: '{{ action_payment }}',
+            confirm: '{{ action_confirm }}',
+            zone: '{{ action_zone }}'
+        },
+        shipping_required: {{ shipping_required ? 'true' : 'false' }},
+        show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
+        show_payment_method: {{ show_payment_method ? 'true' : 'false' }}
+    };
+
+    var SCL = {
+        init: function() {
+            console.log('Simple Checkout Lite initializing...');
+            this.bindEvents();
+            this.loadZones();
+            this.updateAll();
+        },
+
+        bindEvents: function() {
+            var self = this;
+
+            $('#input-country').on('change', function() {
+                self.loadZones();
+                self.updateAll();
+            });
+
+            $('#input-zone').on('change', function() {
+                self.updateAll();
+            });
+
+            $('#input-address-1, #input-city, #input-postcode').on('change', function() {
+                self.updateAll();
+            });
+
+            $(document).on('change', 'input[name="shipping_method"]', function() {
+                self.setShippingMethod($(this).val());
+            });
+
+            $(document).on('change', 'input[name="payment_method"]', function() {
+                self.setPaymentMethod($(this).val());
+            });
+
+            $('#button-confirm').on('click', function() {
+                self.confirmOrder();
+            });
+        },
+
+        loadZones: function() {
+            var country_id = $('#input-country').val();
+            var zone_id = $('#input-zone').data('zone-id');
+
+            if (!country_id) {
+                $('#input-zone').html('<option value="">-- Выберите --</option>');
+                return;
+            }
+
+            $.ajax({
+                url: SimpleCheckoutLite.urls.zone + '&country_id=' + country_id,
+                dataType: 'json',
+                success: function(json) {
+                    var html = '<option value="">-- Выберите --</option>';
+                    if (json && json.length > 0) {
+                        for (var i = 0; i < json.length; i++) {
+                            if (json[i].zone_id == zone_id) {
+                                html += '<option value="' + json[i].zone_id + '" selected="selected">' + json[i].name + '</option>';
+                            } else {
+                                html += '<option value="' + json[i].zone_id + '">' + json[i].name + '</option>';
+                            }
+                        }
+                    }
+                    $('#input-zone').html(html);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Zone load error:', error);
+                }
+            });
+        },
+
+        updateAll: function() {
+            var self = this;
+            console.log('Updating checkout data...');
+
+            this.saveCustomerData(function(result) {
+                if (SimpleCheckoutLite.shipping_required && SimpleCheckoutLite.show_shipping_method) {
+                    self.loadShippingMethods(function() {
+                        self.loadPaymentMethods();
+                    });
+                } else {
+                    self.loadPaymentMethods();
+                }
+            });
+        },
+
+        saveCustomerData: function(callback) {
+            var formData = $('#simple-checkout-form').serialize();
+            console.log('Saving customer data to:', SimpleCheckoutLite.urls.save);
+            console.log('Form data:', formData);
+
+            $.ajax({
+                url: SimpleCheckoutLite.urls.save,
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                success: function(json) {
+                    console.log('Save response:', json);
+                    $('.form-group').removeClass('has-error');
+                    $('.text-danger').remove();
+
+                    if (json && json.error) {
+                        for (var field in json.error) {
+                            var $input = $('#input-' + field.replace(/_/g, '-'));
+                            $input.closest('.form-group').addClass('has-error');
+                            $input.after('<div class="text-danger">' + json.error[field] + '</div>');
+                        }
+                    }
+
+                    if (callback) callback(json || {});
+                },
+                error: function(xhr, status, error) {
+                    console.error('Save AJAX error:', error);
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    if (callback) callback({error: true});
+                }
+            });
+        },
+
+        loadShippingMethods: function(callback) {
+            var $container = $('#shipping-methods');
+            $container.html('<div class="loading-placeholder"><i class="fa fa-spinner fa-spin"></i> Загрузка...</div>');
+
+            $.ajax({
+                url: SimpleCheckoutLite.urls.shipping,
+                dataType: 'json',
+                success: function(json) {
+                    console.log('Shipping response:', json);
+                    if (json && json.error) {
+                        $container.html('<div class="alert alert-warning">' + json.error + '</div>');
+                    } else if (json && json.shipping_methods) {
+                        var html = '';
+                        for (var code in json.shipping_methods) {
+                            var shipping = json.shipping_methods[code];
+                            if (shipping.error) {
+                                html += '<div class="alert alert-warning">' + shipping.error + '</div>';
+                            } else {
+                                html += '<p><strong>' + shipping.title + '</strong></p>';
+                                for (var quote_code in shipping.quote) {
+                                    var quote = shipping.quote[quote_code];
+                                    var value = code + '.' + quote_code;
+                                    var checked = (json.shipping_selected == value) ? ' checked="checked"' : '';
+                                    html += '<div class="radio">';
+                                    html += '<label>';
+                                    html += '<input type="radio" name="shipping_method" value="' + value + '"' + checked + ' />';
+                                    html += quote.title + ' - ' + quote.text;
+                                    html += '</label>';
+                                    html += '</div>';
+                                }
+                            }
+                        }
+                        if (html) {
+                            $container.html(html);
+                        } else {
+                            $container.html('<div class="alert alert-info">Нет доступных способов доставки</div>');
+                        }
+                    } else {
+                        $container.html('<div class="alert alert-info">Нет доступных способов доставки</div>');
+                    }
+
+                    if (callback) callback(json || {});
+                },
+                error: function(xhr, status, error) {
+                    console.error('Shipping error:', error, xhr.responseText);
+                    $container.html('<div class="alert alert-danger">Ошибка загрузки способов доставки</div>');
+                    if (callback) callback({error: true});
+                }
+            });
+        },
+
+        loadPaymentMethods: function(callback) {
+            var $container = $('#payment-methods');
+            if ($container.length === 0) {
+                // Payment methods container doesn't exist, just load totals
+                this.loadTotals();
+                if (callback) callback({});
+                return;
+            }
+
+            $container.html('<div class="loading-placeholder"><i class="fa fa-spinner fa-spin"></i> Загрузка...</div>');
+
+            var self = this;
+            $.ajax({
+                url: SimpleCheckoutLite.urls.payment,
+                dataType: 'json',
+                success: function(json) {
+                    console.log('Payment response:', json);
+                    if (json && json.error) {
+                        $container.html('<div class="alert alert-warning">' + json.error + '</div>');
+                    } else if (json && json.payment_methods) {
+                        var html = '';
+                        for (var code in json.payment_methods) {
+                            var payment = json.payment_methods[code];
+                            var checked = (json.payment_selected == code) ? ' checked="checked"' : '';
+                            html += '<div class="radio">';
+                            html += '<label>';
+                            html += '<input type="radio" name="payment_method" value="' + code + '"' + checked + ' />';
+                            if (payment.image) {
+                                html += '<img src="' + payment.image + '" alt="' + payment.title + '" style="max-height: 20px; margin-right: 5px;" /> ';
+                            }
+                            html += payment.title;
+                            html += '</label>';
+                            html += '</div>';
+                        }
+                        if (html) {
+                            $container.html(html);
+                        } else {
+                            $container.html('<div class="alert alert-info">Нет доступных способов оплаты</div>');
+                        }
+                    } else {
+                        $container.html('<div class="alert alert-info">Нет доступных способов оплаты</div>');
+                    }
+
+                    // Update totals
+                    if (json && json.totals) {
+                        var totalsHtml = '';
+                        for (var i = 0; i < json.totals.length; i++) {
+                            totalsHtml += '<tr>';
+                            totalsHtml += '<td class="text-right"><strong>' + json.totals[i].title + ':</strong></td>';
+                            totalsHtml += '<td class="text-right">' + json.totals[i].text + '</td>';
+                            totalsHtml += '</tr>';
+                        }
+                        $('#totals-table tbody').html(totalsHtml);
+                    }
+
+                    if (callback) callback(json || {});
+                },
+                error: function(xhr, status, error) {
+                    console.error('Payment error:', error, xhr.responseText);
+                    $container.html('<div class="alert alert-danger">Ошибка загрузки способов оплаты</div>');
+                    if (callback) callback({error: true});
+                }
+            });
+        },
+
+        loadTotals: function() {
+            // Load totals separately if payment methods are hidden
+            $.ajax({
+                url: SimpleCheckoutLite.urls.payment,
+                dataType: 'json',
+                success: function(json) {
+                    if (json && json.totals) {
+                        var totalsHtml = '';
+                        for (var i = 0; i < json.totals.length; i++) {
+                            totalsHtml += '<tr>';
+                            totalsHtml += '<td class="text-right"><strong>' + json.totals[i].title + ':</strong></td>';
+                            totalsHtml += '<td class="text-right">' + json.totals[i].text + '</td>';
+                            totalsHtml += '</tr>';
+                        }
+                        $('#totals-table tbody').html(totalsHtml);
+                    }
+                }
+            });
+        },
+
+        setShippingMethod: function(method) {
+            var self = this;
+
+            $.ajax({
+                url: 'index.php?route=extension/module/simple_checkout_lite/setShipping',
+                type: 'POST',
+                data: { shipping_method: method },
+                dataType: 'json',
+                success: function(json) {
+                    if (json && json.success) {
+                        self.loadPaymentMethods();
+                    }
+                }
+            });
+        },
+
+        setPaymentMethod: function(method) {
+            $.ajax({
+                url: 'index.php?route=extension/module/simple_checkout_lite/setPayment',
+                type: 'POST',
+                data: { payment_method: method },
+                dataType: 'json',
+                success: function(json) {
+                    console.log('Payment method set:', method);
+                }
+            });
+        },
+
+        confirmOrder: function() {
+            var self = this;
+            var $btn = $('#button-confirm');
+
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Обработка...');
+
+            this.saveCustomerData(function(saveJson) {
+                if (saveJson && saveJson.error && typeof saveJson.error === 'object') {
+                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                    return;
+                }
+
+                var formData = $('#simple-checkout-form').serialize();
+
+                $.ajax({
+                    url: SimpleCheckoutLite.urls.confirm,
+                    type: 'POST',
+                    data: formData,
+                    dataType: 'json',
+                    success: function(json) {
+                        if (json && json.redirect) {
+                            location = json.redirect;
+                        } else if (json && json.error) {
+                            alert(json.error);
+                            $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                        } else {
+                            $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Confirm error:', error, xhr.responseText);
+                        alert('Произошла ошибка. Попробуйте еще раз.');
+                        $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                    }
+                });
+            });
+        }
+    };
+
+    // Initialize when DOM is ready
+    $(document).ready(function() {
+        SCL.init();
+    });
+
+})(jQuery);
 </script>
 {{ footer }}
