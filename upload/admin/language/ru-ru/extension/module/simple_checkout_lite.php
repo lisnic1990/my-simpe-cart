@@ -23,6 +23,11 @@ $_['entry_status']               = 'Статус модуля';
 $_['entry_guest']                = 'Гостевое оформление';
 $_['entry_payment_default']      = 'Способ оплаты по умолчанию';
 $_['entry_shipping_default']     = 'Способ доставки по умолчанию';
+$_['entry_country_default']      = 'Страна по умолчанию';
+$_['entry_zone_default']         = 'Регион по умолчанию';
+$_['text_select']                = '-- Выберите --';
+$_['text_none']                  = '-- Не выбрано --';
+$_['text_country_help']          = 'Названия стран загружаются из базы данных магазина (Система → Локализация → Страны)';
 
 // Fields
 $_['entry_field_firstname']      = 'Имя';

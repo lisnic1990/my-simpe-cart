@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.3.2
+**Версия:** 1.5.0
 
 ## Architecture
 
@@ -93,6 +93,8 @@ zip -r simple_checkout_lite.ocmod.zip install.xml upload/
 | `module_simple_checkout_lite_step_comment` | bool | Show order comment field |
 | `module_simple_checkout_lite_payment_default` | string | Default payment method code |
 | `module_simple_checkout_lite_shipping_default` | string | Default shipping method code |
+| `module_simple_checkout_lite_country_default` | int | Default country ID |
+| `module_simple_checkout_lite_zone_default` | int | Default zone/region ID |
 
 ### Field Names
 `firstname`, `lastname`, `email`, `telephone`, `company`, `address_1`, `address_2`, `city`, `postcode`, `country`, `zone`
@@ -122,6 +124,15 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
 
 ## Changelog
+
+### 1.5.0
+- Added: Default country and region settings in admin panel
+- Useful for local stores - no need to select country every time
+
+### 1.4.0
+- Added: Form validation - confirm button disabled until all required fields are filled
+- Added: Client-side validation for required fields (firstname, email, telephone, etc.)
+- Added: Agreement checkbox validation
 
 ### 1.3.2
 - Added: Romanian language (ro-ro)

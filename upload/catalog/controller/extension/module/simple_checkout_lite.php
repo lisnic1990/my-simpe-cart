@@ -93,14 +93,17 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $data['customer_email'] = $customer_info['email'];
             $data['customer_telephone'] = $customer_info['telephone'];
 
-            // Default address values
+            // Default address values - use module default country/zone or fall back to config
+            $default_country = $this->config->get('module_simple_checkout_lite_country_default');
+            $default_zone = $this->config->get('module_simple_checkout_lite_zone_default');
+
             $data['customer_company'] = '';
             $data['customer_address_1'] = '';
             $data['customer_address_2'] = '';
             $data['customer_city'] = '';
             $data['customer_postcode'] = '';
-            $data['customer_country_id'] = $this->config->get('config_country_id');
-            $data['customer_zone_id'] = $this->config->get('config_zone_id');
+            $data['customer_country_id'] = $default_country ? $default_country : $this->config->get('config_country_id');
+            $data['customer_zone_id'] = $default_zone ? $default_zone : $this->config->get('config_zone_id');
 
             // Get default address if exists
             $this->load->model('account/address');
@@ -126,8 +129,13 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $data['customer_address_2'] = '';
             $data['customer_city'] = '';
             $data['customer_postcode'] = '';
-            $data['customer_country_id'] = $this->config->get('config_country_id');
-            $data['customer_zone_id'] = $this->config->get('config_zone_id');
+
+            // Use module default country/zone or fall back to config
+            $default_country = $this->config->get('module_simple_checkout_lite_country_default');
+            $default_zone = $this->config->get('module_simple_checkout_lite_zone_default');
+
+            $data['customer_country_id'] = $default_country ? $default_country : $this->config->get('config_country_id');
+            $data['customer_zone_id'] = $default_zone ? $default_zone : $this->config->get('config_zone_id');
         }
 
         // Countries

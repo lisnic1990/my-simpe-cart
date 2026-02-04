@@ -110,6 +110,30 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $data['module_simple_checkout_lite_shipping_default'] = $this->config->get('module_simple_checkout_lite_shipping_default');
         }
 
+        // Default Country
+        if (isset($this->request->post['module_simple_checkout_lite_country_default'])) {
+            $data['module_simple_checkout_lite_country_default'] = $this->request->post['module_simple_checkout_lite_country_default'];
+        } else {
+            $data['module_simple_checkout_lite_country_default'] = $this->config->get('module_simple_checkout_lite_country_default');
+            if ($data['module_simple_checkout_lite_country_default'] === null) {
+                $data['module_simple_checkout_lite_country_default'] = $this->config->get('config_country_id');
+            }
+        }
+
+        // Default Zone
+        if (isset($this->request->post['module_simple_checkout_lite_zone_default'])) {
+            $data['module_simple_checkout_lite_zone_default'] = $this->request->post['module_simple_checkout_lite_zone_default'];
+        } else {
+            $data['module_simple_checkout_lite_zone_default'] = $this->config->get('module_simple_checkout_lite_zone_default');
+            if ($data['module_simple_checkout_lite_zone_default'] === null) {
+                $data['module_simple_checkout_lite_zone_default'] = $this->config->get('config_zone_id');
+            }
+        }
+
+        // Get countries list
+        $this->load->model('localisation/country');
+        $data['countries'] = $this->model_localisation_country->getCountries();
+
         // Get available payment methods
         $this->load->model('setting/extension');
         $data['payment_methods'] = array();
@@ -152,6 +176,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $data['entry_guest'] = $this->language->get('entry_guest');
         $data['entry_payment_default'] = $this->language->get('entry_payment_default');
         $data['entry_shipping_default'] = $this->language->get('entry_shipping_default');
+        $data['entry_country_default'] = $this->language->get('entry_country_default');
+        $data['entry_zone_default'] = $this->language->get('entry_zone_default');
+        $data['text_select'] = $this->language->get('text_select');
+        $data['text_none'] = $this->language->get('text_none');
+        $data['text_country_help'] = $this->language->get('text_country_help');
 
         $data['tab_general'] = $this->language->get('tab_general');
         $data['tab_fields'] = $this->language->get('tab_fields');
@@ -224,5 +253,29 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
     public function uninstall() {
         $this->load->model('setting/setting');
         $this->model_setting_setting->deleteSetting('module_simple_checkout_lite');
+    }
+
+    /**
+     * AJAX: Get zones by country_id
+     */
+    public function zone() {
+        $json = array();
+
+        $this->load->model('localisation/zone');
+
+        $country_id = isset($this->request->get['country_id']) ? (int)$this->request->get['country_id'] : 0;
+
+        $results = $this->model_localisation_zone->getZonesByCountryId($country_id);
+
+        foreach ($results as $result) {
+            $json[] = array(
+                'zone_id' => $result['zone_id'],
+                'name'    => $result['name'],
+                'code'    => $result['code']
+            );
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
     }
 }

@@ -23,6 +23,11 @@ $_['entry_status']               = 'Module Status';
 $_['entry_guest']                = 'Guest Checkout';
 $_['entry_payment_default']      = 'Default Payment Method';
 $_['entry_shipping_default']     = 'Default Shipping Method';
+$_['entry_country_default']      = 'Default Country';
+$_['entry_zone_default']         = 'Default Region';
+$_['text_select']                = '-- Select --';
+$_['text_none']                  = '-- None --';
+$_['text_country_help']          = 'Country names are loaded from store database (System → Localisation → Countries)';
 
 // Fields
 $_['entry_field_firstname']      = 'First Name';

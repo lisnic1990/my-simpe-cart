@@ -23,6 +23,11 @@ $_['entry_status']               = 'Stare modul';
 $_['entry_guest']                = 'Comandă ca oaspete';
 $_['entry_payment_default']      = 'Metodă de plată implicită';
 $_['entry_shipping_default']     = 'Metodă de livrare implicită';
+$_['entry_country_default']      = 'Țară implicită';
+$_['entry_zone_default']         = 'Regiune implicită';
+$_['text_select']                = '-- Selectați --';
+$_['text_none']                  = '-- Nimic --';
+$_['text_country_help']          = 'Numele țărilor sunt încărcate din baza de date a magazinului (Sistem → Localizare → Țări)';
 
 // Fields
 $_['entry_field_firstname']      = 'Prenume';

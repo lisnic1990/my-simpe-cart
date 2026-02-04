@@ -703,7 +703,7 @@
 
                 {# Confirm Button #}
                 <div class="checkout-buttons">
-                  <button type="button" id="button-confirm" class="btn btn-primary btn-lg btn-block btn-checkout">
+                  <button type="button" id="button-confirm" class="btn btn-primary btn-lg btn-block btn-checkout" disabled="disabled">
                     <i class="fa fa-check"></i> {{ button_confirm }}
                   </button>
                 </div>
@@ -733,7 +733,21 @@
         },
         shipping_required: {{ shipping_required ? 'true' : 'false' }},
         show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
-        show_payment_method: {{ show_payment_method ? 'true' : 'false' }}
+        show_payment_method: {{ show_payment_method ? 'true' : 'false' }},
+        require_agree: {{ agree ? 'true' : 'false' }},
+        fields: {
+            firstname: '{{ fields.firstname }}',
+            lastname: '{{ fields.lastname }}',
+            email: '{{ fields.email }}',
+            telephone: '{{ fields.telephone }}',
+            company: '{{ fields.company }}',
+            address_1: '{{ fields.address_1 }}',
+            address_2: '{{ fields.address_2 }}',
+            city: '{{ fields.city }}',
+            postcode: '{{ fields.postcode }}',
+            country: '{{ fields.country }}',
+            zone: '{{ fields.zone }}'
+        }
     };
 
     var SCL = {
@@ -742,10 +756,16 @@
             this.bindEvents();
             this.loadZones();
             this.updateAll();
+            this.validateForm();
         },
 
         bindEvents: function() {
             var self = this;
+
+            // Validate on any input change
+            $('#simple-checkout-form').on('input change', 'input, select, textarea', function() {
+                self.validateForm();
+            });
 
             $('#input-country').on('change', function() {
                 self.loadZones();
@@ -1029,15 +1049,83 @@
             });
         },
 
+        validateForm: function() {
+            var isValid = true;
+            var fields = SimpleCheckoutLite.fields;
+
+            // Check required text fields
+            if (fields.firstname === 'required') {
+                var val = $('#input-firstname').val();
+                if (!val || val.trim().length < 1 || val.trim().length > 32) isValid = false;
+            }
+
+            if (fields.lastname === 'required') {
+                var val = $('#input-lastname').val();
+                if (!val || val.trim().length < 1 || val.trim().length > 32) isValid = false;
+            }
+
+            if (fields.email === 'required') {
+                var val = $('#input-email').val();
+                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!val || !emailRegex.test(val)) isValid = false;
+            }
+
+            if (fields.telephone === 'required') {
+                var val = $('#input-telephone').val();
+                if (!val || val.trim().length < 3 || val.trim().length > 32) isValid = false;
+            }
+
+            if (fields.address_1 === 'required') {
+                var val = $('#input-address-1').val();
+                if (!val || val.trim().length < 3 || val.trim().length > 128) isValid = false;
+            }
+
+            if (fields.city === 'required') {
+                var val = $('#input-city').val();
+                if (!val || val.trim().length < 2 || val.trim().length > 128) isValid = false;
+            }
+
+            if (fields.postcode === 'required') {
+                var val = $('#input-postcode').val();
+                if (!val || val.trim().length < 2 || val.trim().length > 10) isValid = false;
+            }
+
+            if (fields.country === 'required') {
+                var val = $('#input-country').val();
+                if (!val || val === '') isValid = false;
+            }
+
+            if (fields.zone === 'required') {
+                var val = $('#input-zone').val();
+                if (!val || val === '') isValid = false;
+            }
+
+            // Check agreement checkbox
+            if (SimpleCheckoutLite.require_agree) {
+                if (!$('input[name="agree"]').is(':checked')) isValid = false;
+            }
+
+            // Enable/disable button
+            $('#button-confirm').prop('disabled', !isValid);
+
+            return isValid;
+        },
+
         confirmOrder: function() {
             var self = this;
             var $btn = $('#button-confirm');
+
+            // Double-check validation
+            if (!this.validateForm()) {
+                return;
+            }
 
             $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Обработка...');
 
             this.saveCustomerData(function(saveJson) {
                 if (saveJson && saveJson.error && typeof saveJson.error === 'object') {
-                    $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                    $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                    self.validateForm();
                     return;
                 }
 
@@ -1053,15 +1141,18 @@
                             location = json.redirect;
                         } else if (json && json.error) {
                             alert(json.error);
-                            $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                            $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                            self.validateForm();
                         } else {
-                            $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                            $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                            self.validateForm();
                         }
                     },
                     error: function(xhr, status, error) {
                         console.error('Confirm error:', error, xhr.responseText);
                         alert('Произошла ошибка. Попробуйте еще раз.');
-                        $btn.prop('disabled', false).html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                        $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
+                        self.validateForm();
                     }
                 });
             });
