@@ -973,26 +973,38 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         // If no totals from extensions, calculate basic totals
         if (empty($totals)) {
+            $sub_total = $this->cart->getSubTotal();
+            $shipping_cost = 0;
+
             $totals[] = array(
                 'code'       => 'sub_total',
                 'title'      => $this->language->get('text_sub_total'),
-                'value'      => $this->cart->getSubTotal(),
+                'value'      => $sub_total,
                 'sort_order' => 1
             );
 
             if (isset($this->session->data['shipping_method'])) {
+                $shipping_cost = (float)$this->session->data['shipping_method']['cost'];
+
+                // Add shipping tax if applicable
+                if (isset($this->session->data['shipping_method']['tax_class_id']) && $this->session->data['shipping_method']['tax_class_id']) {
+                    $shipping_cost = $this->tax->calculate($shipping_cost, $this->session->data['shipping_method']['tax_class_id'], $this->config->get('config_tax'));
+                }
+
                 $totals[] = array(
                     'code'       => 'shipping',
                     'title'      => $this->session->data['shipping_method']['title'],
-                    'value'      => $this->session->data['shipping_method']['cost'],
+                    'value'      => $shipping_cost,
                     'sort_order' => 3
                 );
             }
 
+            $grand_total = $sub_total + $shipping_cost;
+
             $totals[] = array(
                 'code'       => 'total',
                 'title'      => $this->language->get('text_total'),
-                'value'      => $this->cart->getTotal(),
+                'value'      => $grand_total,
                 'sort_order' => 9
             );
         }
