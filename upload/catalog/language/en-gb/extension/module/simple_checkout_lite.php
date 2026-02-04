@@ -14,7 +14,7 @@ $_['text_shipping_method']  = 'Shipping Method';
 $_['text_payment_method']   = 'Payment Method';
 $_['text_comments']         = 'Order Comments';
 $_['text_loading']          = 'Loading...';
-$_['text_agree']            = 'I have read and agree to the <a href="%s" class="agree"><b>%s</b></a>';
+$_['text_agree']            = 'I have read and agree to the <a href="%s" class="agree"><b>Terms &amp; Conditions</b></a>.';
 $_['text_cart']             = 'Shopping Cart';
 $_['text_home']             = 'Home';
 
@@ -46,7 +46,7 @@ $_['error_city']            = 'City must be between 2 and 128 characters!';
 $_['error_postcode']        = 'Postcode must be between 2 and 10 characters!';
 $_['error_country']         = 'Please select a country!';
 $_['error_zone']            = 'Please select a region / state!';
-$_['error_agree']           = 'You must agree to the terms and conditions!';
+$_['error_agree']           = 'You must read and agree to the Terms &amp; Conditions!';
 $_['error_shipping']        = 'Warning: Shipping method required!';
 $_['error_payment']         = 'Warning: Payment method required!';
 $_['error_no_shipping']     = 'Warning: No Shipping options are available!';

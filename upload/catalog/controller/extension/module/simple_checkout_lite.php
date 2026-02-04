@@ -154,7 +154,7 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $data['text_payment_method'] = $this->language->get('text_payment_method');
         $data['text_comments'] = $this->language->get('text_comments');
         $data['text_loading'] = $this->language->get('text_loading');
-        $data['text_agree'] = sprintf($this->language->get('text_agree'), $this->url->link('information/information/agree', 'information_id=' . $this->config->get('config_checkout_id'), true), $this->config->get('config_name'));
+        $data['text_agree'] = sprintf($this->language->get('text_agree'), $this->url->link('information/information/agree', 'information_id=' . $this->config->get('config_checkout_id'), true));
 
         $data['entry_firstname'] = $this->language->get('entry_firstname');
         $data['entry_lastname'] = $this->language->get('entry_lastname');
@@ -633,6 +633,7 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $json = array();
 
         $this->load->language('checkout/checkout');
+        $this->load->language('extension/module/simple_checkout_lite');
 
         // Validate cart
         if (!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) {
