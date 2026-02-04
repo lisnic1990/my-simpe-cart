@@ -609,8 +609,16 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 $json['error'] = $this->language->get('error_address');
             }
 
-            if (!isset($this->session->data['shipping_method'])) {
-                $json['error'] = $this->language->get('error_shipping');
+            // Only validate shipping method if step is enabled
+            if ($this->config->get('module_simple_checkout_lite_step_shipping_method')) {
+                if (!isset($this->session->data['shipping_method'])) {
+                    $json['error'] = $this->language->get('error_shipping');
+                }
+            } else {
+                // Auto-select first shipping method if step is disabled
+                if (!isset($this->session->data['shipping_method'])) {
+                    $this->autoSelectShippingMethod();
+                }
             }
         }
 
@@ -971,6 +979,42 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
 
             $this->response->redirect($this->url->link('checkout/success', '', true));
+        }
+    }
+
+    /**
+     * Auto-select first available shipping method
+     */
+    private function autoSelectShippingMethod() {
+        if (isset($this->session->data['shipping_methods']) && $this->session->data['shipping_methods']) {
+            foreach ($this->session->data['shipping_methods'] as $code => $shipping) {
+                if (isset($shipping['quote']) && $shipping['quote']) {
+                    foreach ($shipping['quote'] as $quote) {
+                        $this->session->data['shipping_method'] = $quote;
+                        return;
+                    }
+                }
+            }
+        }
+
+        // If no shipping methods in session, try to load them
+        if (isset($this->session->data['shipping_address'])) {
+            $this->load->model('setting/extension');
+            $results = $this->model_setting_extension->getExtensions('shipping');
+
+            foreach ($results as $result) {
+                if ($this->config->get('shipping_' . $result['code'] . '_status')) {
+                    $this->load->model('extension/shipping/' . $result['code']);
+                    $quote = $this->{'model_extension_shipping_' . $result['code']}->getQuote($this->session->data['shipping_address']);
+
+                    if ($quote && isset($quote['quote'])) {
+                        foreach ($quote['quote'] as $method) {
+                            $this->session->data['shipping_method'] = $method;
+                            return;
+                        }
+                    }
+                }
+            }
         }
     }
 
