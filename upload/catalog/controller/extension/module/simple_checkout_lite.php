@@ -614,9 +614,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             }
         }
 
-        // Validate payment
-        if (!isset($this->session->data['payment_method'])) {
-            $json['error'] = $this->language->get('error_payment');
+        // Validate payment (only if payment step is enabled)
+        if ($this->config->get('module_simple_checkout_lite_step_payment_method')) {
+            if (!isset($this->session->data['payment_method'])) {
+                $json['error'] = $this->language->get('error_payment');
+            }
         }
 
         // Validate guest/payment_address
@@ -892,8 +894,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             $this->session->data['order_id'] = $order_id;
 
-            // Payment
-            $json['redirect'] = $this->url->link('extension/module/simple_checkout_lite/pay', '', true);
+            // If payment step is disabled, confirm order directly
+            if (!$this->config->get('module_simple_checkout_lite_step_payment_method') || !isset($this->session->data['payment_method'])) {
+                $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('config_order_status_id'));
+                $json['redirect'] = $this->url->link('checkout/success', '', true);
+            } else {
+                // Go to payment page
+                $json['redirect'] = $this->url->link('extension/module/simple_checkout_lite/pay', '', true);
+            }
         }
 
         $this->response->addHeader('Content-Type: application/json');
