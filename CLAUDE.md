@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.5.0
+**Версия:** 1.5.2
 
 ## Architecture
 
@@ -31,7 +31,8 @@ upload/
 ### Key Components
 
 **Admin Controller** (`admin/controller/extension/module/simple_checkout_lite.php`):
-- Settings management (fields visibility, steps visibility, default methods)
+- Settings management (fields visibility, steps visibility, default methods, default country/zone)
+- AJAX endpoint: `zone()` - returns zones by country_id (JSON)
 - Install/uninstall hooks with default settings
 
 **Catalog Controller** (`catalog/controller/extension/module/simple_checkout_lite.php`):
@@ -122,8 +123,19 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Product list with thumbnails in order summary
 - Auto-select shipping/payment when steps are disabled
 - Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
+- Client-side form validation - confirm button disabled until required fields filled
+- Default country/zone pre-selection for local stores
 
 ## Changelog
+
+### 1.5.2
+- Fixed: Label alignment in checkout forms - labels were right-aligned due to Bootstrap 3 `form-horizontal` + `control-label` combination
+- Added CSS override (`text-align: left`, `float: none`, `width: 100%`) in both unishop2_free and default templates
+
+### 1.5.1
+- Fixed: Admin menu duplicating across all menu items (OCMOD search pattern matched multiple times)
+- Changed: OCMOD search from `$data['menus'][] = array(` to unique `$data['menus'] = array();`
+- Fixed: Admin zone AJAX endpoint - added `zone()` method to admin controller (OpenCart admin has no built-in JSON zone endpoint)
 
 ### 1.5.0
 - Added: Default country and region settings in admin panel
