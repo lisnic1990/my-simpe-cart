@@ -1,0 +1,72 @@
+{{ header }}
+<div id="checkout-checkout" class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">{{ content_top }}
+      <h1 class="heading-title">{{ heading_title }}</h1>
+
+      <div class="checkout-section checkout-payment-form">
+        <div class="checkout-section-header">
+          <span class="checkout-section-icon"><i class="fa fa-credit-card"></i></span>
+          <span class="checkout-section-title">Оплата заказа</span>
+        </div>
+        <div class="checkout-section-body">
+          {{ payment }}
+        </div>
+      </div>
+
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+
+<style>
+.checkout-section {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.checkout-section-header {
+  background: #f8f8f8;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  border-radius: 4px 4px 0 0;
+}
+
+.checkout-section-icon {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.checkout-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.checkout-section-body {
+  padding: 20px;
+}
+</style>
+{{ footer }}

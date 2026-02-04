@@ -1,0 +1,127 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <button type="submit" form="form-module" data-toggle="tooltip" title="{{ button_save }}" class="btn btn-primary"><i class="fa fa-save"></i></button>
+        <a href="{{ cancel }}" data-toggle="tooltip" title="{{ button_cancel }}" class="btn btn-default"><i class="fa fa-reply"></i></a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+      <ul class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+    <div class="alert alert-danger alert-dismissible"><i class="fa fa-exclamation-circle"></i> {{ error_warning }}
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    {% endif %}
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ text_edit }}</h3>
+      </div>
+      <div class="panel-body">
+        <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-module" class="form-horizontal">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li><a href="#tab-fields" data-toggle="tab">{{ tab_fields }}</a></li>
+            <li><a href="#tab-steps" data-toggle="tab">{{ tab_steps }}</a></li>
+          </ul>
+          <div class="tab-content">
+            <!-- General Tab -->
+            <div class="tab-pane active" id="tab-general">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-status">{{ entry_status }}</label>
+                <div class="col-sm-10">
+                  <select name="module_simple_checkout_lite_status" id="input-status" class="form-control">
+                    {% if module_simple_checkout_lite_status %}
+                    <option value="1" selected="selected">{{ text_enabled }}</option>
+                    <option value="0">{{ text_disabled }}</option>
+                    {% else %}
+                    <option value="1">{{ text_enabled }}</option>
+                    <option value="0" selected="selected">{{ text_disabled }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-guest">{{ entry_guest }}</label>
+                <div class="col-sm-10">
+                  <select name="module_simple_checkout_lite_guest" id="input-guest" class="form-control">
+                    {% if module_simple_checkout_lite_guest %}
+                    <option value="1" selected="selected">{{ text_yes }}</option>
+                    <option value="0">{{ text_no }}</option>
+                    {% else %}
+                    <option value="1">{{ text_yes }}</option>
+                    <option value="0" selected="selected">{{ text_no }}</option>
+                    {% endif %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-payment-default">{{ entry_payment_default }}</label>
+                <div class="col-sm-10">
+                  <select name="module_simple_checkout_lite_payment_default" id="input-payment-default" class="form-control">
+                    <option value="">---</option>
+                    {% for method in payment_methods %}
+                    <option value="{{ method.code }}" {% if module_simple_checkout_lite_payment_default == method.code %}selected="selected"{% endif %}>{{ method.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="col-sm-2 control-label" for="input-shipping-default">{{ entry_shipping_default }}</label>
+                <div class="col-sm-10">
+                  <select name="module_simple_checkout_lite_shipping_default" id="input-shipping-default" class="form-control">
+                    <option value="">---</option>
+                    {% for method in shipping_methods %}
+                    <option value="{{ method.code }}" {% if module_simple_checkout_lite_shipping_default == method.code %}selected="selected"{% endif %}>{{ method.title }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <!-- Fields Tab -->
+            <div class="tab-pane" id="tab-fields">
+              {% set fields = ['firstname', 'lastname', 'email', 'telephone', 'address_1', 'address_2', 'city', 'postcode', 'country', 'zone', 'company'] %}
+              {% for field in fields %}
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ attribute(_context, 'entry_field_' ~ field) }}</label>
+                <div class="col-sm-10">
+                  {% set field_value = attribute(_context, 'module_simple_checkout_lite_field_' ~ field) %}
+                  <select name="module_simple_checkout_lite_field_{{ field }}" class="form-control">
+                    <option value="required" {% if field_value == 'required' %}selected="selected"{% endif %}>{{ text_required }}</option>
+                    <option value="visible" {% if field_value == 'visible' %}selected="selected"{% endif %}>{{ text_visible }}</option>
+                    <option value="hidden" {% if field_value == 'hidden' %}selected="selected"{% endif %}>{{ text_hidden }}</option>
+                  </select>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <!-- Steps Tab -->
+            <div class="tab-pane" id="tab-steps">
+              {% set steps = ['shipping_address', 'shipping_method', 'payment_method', 'comment'] %}
+              {% for step in steps %}
+              <div class="form-group">
+                <label class="col-sm-2 control-label">{{ attribute(_context, 'entry_step_' ~ step) }}</label>
+                <div class="col-sm-10">
+                  {% set step_value = attribute(_context, 'module_simple_checkout_lite_step_' ~ step) %}
+                  <select name="module_simple_checkout_lite_step_{{ step }}" class="form-control">
+                    <option value="1" {% if step_value %}selected="selected"{% endif %}>{{ text_yes }}</option>
+                    <option value="0" {% if not step_value %}selected="selected"{% endif %}>{{ text_no }}</option>
+                  </select>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}

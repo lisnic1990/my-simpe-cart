@@ -1,0 +1,554 @@
+{{ header }}
+<div id="checkout-checkout" class="container">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    <li><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="row">{{ column_left }}
+    {% if column_left and column_right %}
+    {% set class = 'col-sm-6' %}
+    {% elseif column_left or column_right %}
+    {% set class = 'col-sm-9' %}
+    {% else %}
+    {% set class = 'col-sm-12' %}
+    {% endif %}
+    <div id="content" class="{{ class }}">{{ content_top }}
+      <h1 class="heading-title">{{ heading_title }}</h1>
+
+      <div id="simple-checkout-lite" class="simple-checkout-wrapper">
+        <form id="simple-checkout-form" class="form-horizontal">
+
+          {# Unishop2 styled checkout sections #}
+          <div class="row">
+            <div class="col-md-8">
+
+              {# Customer Information - Unishop2 style #}
+              <div class="checkout-section checkout-customer">
+                <div class="checkout-section-header">
+                  <span class="checkout-section-icon"><i class="fa fa-user"></i></span>
+                  <span class="checkout-section-title">{{ text_customer_info }}</span>
+                </div>
+                <div class="checkout-section-body">
+                  <div class="row">
+                    {# First Name #}
+                    {% if fields.firstname != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.firstname == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-firstname">{{ entry_firstname }}</label>
+                        <input type="text" name="firstname" value="{{ customer_firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Last Name #}
+                    {% if fields.lastname != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.lastname == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-lastname">{{ entry_lastname }}</label>
+                        <input type="text" name="lastname" value="{{ customer_lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Email #}
+                    {% if fields.email != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.email == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-email">{{ entry_email }}</label>
+                        <input type="email" name="email" value="{{ customer_email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Telephone #}
+                    {% if fields.telephone != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.telephone == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-telephone">{{ entry_telephone }}</label>
+                        <input type="tel" name="telephone" value="{{ customer_telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Company #}
+                    {% if fields.company != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.company == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-company">{{ entry_company }}</label>
+                        <input type="text" name="company" value="{{ customer_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+
+              {# Address Section - Unishop2 style #}
+              {% if shipping_required or fields.address_1 != 'hidden' or fields.city != 'hidden' or fields.country != 'hidden' %}
+              <div class="checkout-section checkout-address">
+                <div class="checkout-section-header">
+                  <span class="checkout-section-icon"><i class="fa fa-map-marker"></i></span>
+                  <span class="checkout-section-title">{{ text_shipping_address }}</span>
+                </div>
+                <div class="checkout-section-body">
+                  <div class="row">
+                    {# Address 1 #}
+                    {% if fields.address_1 != 'hidden' %}
+                    <div class="col-sm-12">
+                      <div class="form-group{% if fields.address_1 == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-address-1">{{ entry_address_1 }}</label>
+                        <input type="text" name="address_1" value="{{ customer_address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Address 2 #}
+                    {% if fields.address_2 != 'hidden' %}
+                    <div class="col-sm-12">
+                      <div class="form-group{% if fields.address_2 == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-address-2">{{ entry_address_2 }}</label>
+                        <input type="text" name="address_2" value="{{ customer_address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# City #}
+                    {% if fields.city != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.city == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-city">{{ entry_city }}</label>
+                        <input type="text" name="city" value="{{ customer_city }}" placeholder="{{ entry_city }}" id="input-city" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Postcode #}
+                    {% if fields.postcode != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.postcode == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-postcode">{{ entry_postcode }}</label>
+                        <input type="text" name="postcode" value="{{ customer_postcode }}" placeholder="{{ entry_postcode }}" id="input-postcode" class="form-control input-lg" />
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Country #}
+                    {% if fields.country != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.country == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-country">{{ entry_country }}</label>
+                        <select name="country_id" id="input-country" class="form-control input-lg">
+                          <option value="">{{ entry_country }}</option>
+                          {% for country in countries %}
+                          {% if country.country_id == customer_country_id %}
+                          <option value="{{ country.country_id }}" selected="selected">{{ country.name }}</option>
+                          {% else %}
+                          <option value="{{ country.country_id }}">{{ country.name }}</option>
+                          {% endif %}
+                          {% endfor %}
+                        </select>
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+
+                    {# Zone #}
+                    {% if fields.zone != 'hidden' %}
+                    <div class="col-sm-6 col-xs-12">
+                      <div class="form-group{% if fields.zone == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-zone">{{ entry_zone }}</label>
+                        <select name="zone_id" id="input-zone" class="form-control input-lg" data-zone-id="{{ customer_zone_id }}">
+                        </select>
+                        <div class="field-error"></div>
+                      </div>
+                    </div>
+                    {% endif %}
+                  </div>
+
+                  {# Same address checkbox #}
+                  {% if show_shipping_address %}
+                  <div class="form-group">
+                    <div class="checkbox custom-checkbox">
+                      <label>
+                        <input type="checkbox" name="shipping_address" value="1" checked="checked" />
+                        <span class="checkbox-icon"></span>
+                        {{ entry_same_address }}
+                      </label>
+                    </div>
+                  </div>
+                  {% else %}
+                  <input type="hidden" name="shipping_address" value="1" />
+                  {% endif %}
+                </div>
+              </div>
+              {% endif %}
+
+              {# Shipping Method - Unishop2 style #}
+              {% if shipping_required and show_shipping_method %}
+              <div class="checkout-section checkout-shipping">
+                <div class="checkout-section-header">
+                  <span class="checkout-section-icon"><i class="fa fa-truck"></i></span>
+                  <span class="checkout-section-title">{{ text_shipping_method }}</span>
+                </div>
+                <div class="checkout-section-body">
+                  <div id="shipping-methods" class="shipping-methods-list">
+                    <div class="loading-placeholder">
+                      <i class="fa fa-spinner fa-spin"></i> {{ text_loading }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              {# Payment Method - Unishop2 style #}
+              {% if show_payment_method %}
+              <div class="checkout-section checkout-payment">
+                <div class="checkout-section-header">
+                  <span class="checkout-section-icon"><i class="fa fa-credit-card"></i></span>
+                  <span class="checkout-section-title">{{ text_payment_method }}</span>
+                </div>
+                <div class="checkout-section-body">
+                  <div id="payment-methods" class="payment-methods-list">
+                    <div class="loading-placeholder">
+                      <i class="fa fa-spinner fa-spin"></i> {{ text_loading }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+
+              {# Order Comment - Unishop2 style #}
+              {% if show_comment %}
+              <div class="checkout-section checkout-comment">
+                <div class="checkout-section-header">
+                  <span class="checkout-section-icon"><i class="fa fa-comment"></i></span>
+                  <span class="checkout-section-title">{{ text_comments }}</span>
+                </div>
+                <div class="checkout-section-body">
+                  <textarea name="comment" rows="4" class="form-control input-lg" placeholder="{{ entry_comment }}"></textarea>
+                </div>
+              </div>
+              {% endif %}
+
+            </div>
+
+            {# Sidebar with totals #}
+            <div class="col-md-4">
+              <div class="checkout-sidebar">
+                <div class="checkout-section checkout-totals">
+                  <div class="checkout-section-header">
+                    <span class="checkout-section-icon"><i class="fa fa-shopping-cart"></i></span>
+                    <span class="checkout-section-title">Ваш заказ</span>
+                  </div>
+                  <div class="checkout-section-body">
+                    <table class="table table-totals" id="totals-table">
+                      <tbody>
+                        <tr>
+                          <td colspan="2" class="text-center">
+                            <i class="fa fa-spinner fa-spin"></i> {{ text_loading }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {# Agreement #}
+                {% if agree %}
+                <div class="checkout-agree">
+                  <div class="checkbox custom-checkbox">
+                    <label>
+                      <input type="checkbox" name="agree" value="1" />
+                      <span class="checkbox-icon"></span>
+                      {{ text_agree }}
+                    </label>
+                  </div>
+                </div>
+                {% endif %}
+
+                {# Confirm Button #}
+                <div class="checkout-buttons">
+                  <button type="button" id="button-confirm" class="btn btn-primary btn-lg btn-block btn-checkout">
+                    <i class="fa fa-check"></i> {{ button_confirm }}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+      {{ content_bottom }}</div>
+    {{ column_right }}</div>
+</div>
+
+<style>
+/* Simple Checkout Lite - Unishop2 Free Theme Styles */
+.simple-checkout-wrapper {
+  margin-bottom: 30px;
+}
+
+.checkout-section {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.checkout-section-header {
+  background: #f8f8f8;
+  padding: 15px 20px;
+  border-bottom: 1px solid #e5e5e5;
+  border-radius: 4px 4px 0 0;
+}
+
+.checkout-section-icon {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  background: #4CAF50;
+  color: #fff;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.checkout-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.checkout-section-body {
+  padding: 20px;
+}
+
+.checkout-section .form-group {
+  margin-bottom: 15px;
+}
+
+.checkout-section .form-group label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 5px;
+}
+
+.checkout-section .form-control {
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  padding: 10px 15px;
+  height: auto;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.checkout-section .form-control:focus {
+  border-color: #4CAF50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
+.checkout-section .form-group.has-error .form-control {
+  border-color: #f44336;
+}
+
+.checkout-section .form-group.has-error .field-error,
+.checkout-section .text-danger {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.checkout-section .required label:before {
+  content: '* ';
+  color: #f44336;
+}
+
+/* Custom checkbox for unishop2 */
+.custom-checkbox label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: normal;
+}
+
+.custom-checkbox input[type="checkbox"] {
+  display: none;
+}
+
+.custom-checkbox .checkbox-icon {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ddd;
+  border-radius: 3px;
+  margin-right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.custom-checkbox input[type="checkbox"]:checked + .checkbox-icon:after {
+  content: '\f00c';
+  font-family: FontAwesome;
+  color: #fff;
+  font-size: 12px;
+}
+
+/* Shipping and Payment methods */
+.shipping-methods-list .radio,
+.payment-methods-list .radio {
+  margin: 0;
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  transition: all 0.2s;
+}
+
+.shipping-methods-list .radio:hover,
+.payment-methods-list .radio:hover {
+  border-color: #4CAF50;
+  background: #f9fff9;
+}
+
+.shipping-methods-list .radio label,
+.payment-methods-list .radio label {
+  font-weight: normal;
+  cursor: pointer;
+  display: block;
+}
+
+.shipping-methods-list .radio input[type="radio"],
+.payment-methods-list .radio input[type="radio"] {
+  margin-right: 10px;
+}
+
+.loading-placeholder {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+/* Sidebar */
+.checkout-sidebar {
+  position: sticky;
+  top: 20px;
+}
+
+.table-totals {
+  margin-bottom: 0;
+}
+
+.table-totals td {
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+}
+
+.table-totals tr:first-child td {
+  border-top: none;
+}
+
+.table-totals tr:last-child td {
+  font-size: 18px;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.checkout-agree {
+  padding: 15px;
+  background: #f8f8f8;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+.btn-checkout {
+  background: #4CAF50;
+  border-color: #4CAF50;
+  font-size: 16px;
+  padding: 15px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s;
+}
+
+.btn-checkout:hover,
+.btn-checkout:focus {
+  background: #43a047;
+  border-color: #43a047;
+}
+
+.btn-checkout:disabled {
+  background: #ccc;
+  border-color: #ccc;
+}
+
+/* Alert styles */
+.checkout-section .alert {
+  margin-bottom: 0;
+  border-radius: 4px;
+}
+
+/* Mobile responsive */
+@media (max-width: 991px) {
+  .checkout-sidebar {
+    position: static;
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 767px) {
+  .checkout-section-body {
+    padding: 15px;
+  }
+
+  .checkout-section-header {
+    padding: 12px 15px;
+  }
+
+  .checkout-section-title {
+    font-size: 14px;
+  }
+
+  .btn-checkout {
+    font-size: 14px;
+    padding: 12px 20px;
+  }
+}
+</style>
+
+<script type="text/javascript">
+var SimpleCheckoutLite = {
+  urls: {
+    save: '{{ action_save }}',
+    shipping: '{{ action_shipping }}',
+    payment: '{{ action_payment }}',
+    confirm: '{{ action_confirm }}',
+    zone: '{{ action_zone }}'
+  },
+  shipping_required: {{ shipping_required ? 'true' : 'false' }},
+  show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
+  show_payment_method: {{ show_payment_method ? 'true' : 'false' }},
+  shipping_default: '{{ shipping_default }}',
+  payment_default: '{{ payment_default }}'
+};
+</script>
+{{ footer }}

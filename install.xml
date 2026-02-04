@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Simple Checkout Lite</name>
+    <code>simple_checkout_lite</code>
+    <version>1.0.0</version>
+    <author>Developer</author>
+    <link>https://example.com</link>
+
+    <!-- Редирект стандартного checkout на Simple Checkout Lite -->
+    <file path="catalog/controller/checkout/checkout.php">
+        <operation>
+            <search><![CDATA[public function index() {]]></search>
+            <add position="after"><![CDATA[
+        // Simple Checkout Lite - redirect to simplified checkout
+        if ($this->config->get('module_simple_checkout_lite_status')) {
+            $this->response->redirect($this->url->link('extension/module/simple_checkout_lite', '', true));
+            return;
+        }
+]]></add>
+        </operation>
+    </file>
+
+    <!-- Добавление ссылки на Simple Checkout в меню корзины (header) для темы default -->
+    <file path="catalog/controller/common/cart.php">
+        <operation>
+            <search><![CDATA[$data['checkout'] = $this->url->link('checkout/checkout', '', true);]]></search>
+            <add position="replace"><![CDATA[
+        // Simple Checkout Lite
+        if ($this->config->get('module_simple_checkout_lite_status')) {
+            $data['checkout'] = $this->url->link('extension/module/simple_checkout_lite', '', true);
+        } else {
+            $data['checkout'] = $this->url->link('checkout/checkout', '', true);
+        }
+]]></add>
+        </operation>
+    </file>
+
+    <!-- Интеграция с unishop2_free: добавление маршрута в контроллер корзины темы -->
+    <file path="catalog/controller/checkout/cart.php">
+        <operation>
+            <search><![CDATA[$data['checkout'] = $this->url->link('checkout/checkout', '', true);]]></search>
+            <add position="replace"><![CDATA[
+        // Simple Checkout Lite
+        if ($this->config->get('module_simple_checkout_lite_status')) {
+            $data['checkout'] = $this->url->link('extension/module/simple_checkout_lite', '', true);
+        } else {
+            $data['checkout'] = $this->url->link('checkout/checkout', '', true);
+        }
+]]></add>
+        </operation>
+    </file>
+
+    <!-- Добавление пункта меню в админку -->
+    <file path="admin/controller/common/column_left.php">
+        <operation>
+            <search><![CDATA[$data['menus'][] = array(]]></search>
+            <add position="before"><![CDATA[
+        // Simple Checkout Lite menu
+        if ($this->user->hasPermission('access', 'extension/module/simple_checkout_lite')) {
+            $scl_menu = array();
+            $scl_menu[] = array(
+                'name'     => 'Настройки',
+                'href'     => $this->url->link('extension/module/simple_checkout_lite', 'user_token=' . $this->session->data['user_token'], true),
+                'children' => array()
+            );
+        }
+]]></add>
+        </operation>
+    </file>
+
+</modification>
