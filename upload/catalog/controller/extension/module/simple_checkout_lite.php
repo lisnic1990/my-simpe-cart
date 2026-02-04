@@ -165,6 +165,39 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         $data['agree'] = $this->config->get('config_checkout_id');
 
+        // Cart products for display
+        $this->load->model('tool/image');
+        $data['products'] = array();
+
+        foreach ($this->cart->getProducts() as $product) {
+            if ($product['image']) {
+                $image = $this->model_tool_image->resize($product['image'], 60, 60);
+            } else {
+                $image = $this->model_tool_image->resize('placeholder.png', 60, 60);
+            }
+
+            $option_data = array();
+            foreach ($product['option'] as $option) {
+                $option_data[] = array(
+                    'name'  => $option['name'],
+                    'value' => $option['value']
+                );
+            }
+
+            $data['products'][] = array(
+                'cart_id'   => $product['cart_id'],
+                'product_id' => $product['product_id'],
+                'name'      => $product['name'],
+                'model'     => $product['model'],
+                'option'    => $option_data,
+                'quantity'  => $product['quantity'],
+                'price'     => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+                'total'     => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')) * $product['quantity'], $this->session->data['currency']),
+                'image'     => $image,
+                'href'      => $this->url->link('product/product', 'product_id=' . $product['product_id'])
+            );
+        }
+
         // No sidebars and no content modules for checkout - clean layout
         $data['column_left'] = '';
         $data['column_right'] = '';

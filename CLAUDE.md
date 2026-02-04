@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Simple Checkout Lite - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
+**Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
+
+**Версия:** 1.3.0
 
 ## Architecture
 
@@ -19,11 +21,11 @@ upload/
 ├── catalog/
 │   ├── controller/extension/module/simple_checkout_lite.php
 │   ├── language/{ru-ru,en-gb}/extension/module/simple_checkout_lite.php
-│   └── view/
-│       ├── javascript/simple_checkout_lite.js
-│       └── theme/
-│           ├── default/template/extension/module/simple_checkout_lite{,_pay}.twig
-│           └── unishop2_free/template/extension/module/simple_checkout_lite{,_pay}.twig
+│   └── view/theme/
+│       ├── default/template/extension/module/simple_checkout_lite.twig
+│       └── unishop2_free/template/extension/module/
+│           ├── simple_checkout_lite.twig      # Основной шаблон чекаута
+│           └── simple_checkout_lite_pay.twig  # Страница оплаты
 ```
 
 ### Key Components
@@ -33,14 +35,18 @@ upload/
 - Install/uninstall hooks with default settings
 
 **Catalog Controller** (`catalog/controller/extension/module/simple_checkout_lite.php`):
-- Main checkout page rendering
-- AJAX endpoints: `save`, `shipping`, `payment`, `setShipping`, `setPayment`, `confirm`, `zone`, `pay`
+- Main checkout page rendering with cart products
+- AJAX endpoints: `save`, `shipping`, `payment`, `totals`, `setShipping`, `setPayment`, `confirm`, `zone`
+- `pay()` - Payment processing page
+- `getTotalsHtml()` - Calculate and format order totals
+- `autoSelectShippingMethod()` - Auto-select shipping when step is disabled
 - Order creation logic
 
-**JavaScript** (`catalog/view/javascript/simple_checkout_lite.js`):
-- AJAX updates for shipping/payment methods
-- Form validation and submission
-- Dynamic zone loading
+**Templates** (`catalog/view/theme/unishop2_free/template/extension/module/`):
+- Embedded JavaScript (no external JS file) for proper variable initialization
+- Flex-based form layout with `.form-row` / `.form-col` classes
+- Product list display in sidebar with images, options, prices
+- Custom styled checkboxes, buttons matching unishop2_free theme
 
 ### OpenCart 3.x Conventions
 
@@ -55,8 +61,9 @@ upload/
 
 The install.xml modifies:
 1. `catalog/controller/checkout/checkout.php` - redirect to simple checkout
-2. `catalog/controller/common/cart.php` - update checkout link
-3. `catalog/controller/checkout/cart.php` - update checkout link
+2. `catalog/controller/common/cart.php` - update checkout link in header cart
+3. `catalog/controller/checkout/cart.php` - update checkout link in cart page
+4. `admin/controller/common/column_left.php` - add admin menu item
 
 ## Build & Package
 
@@ -80,15 +87,62 @@ zip -r simple_checkout_lite.ocmod.zip install.xml upload/
 | `module_simple_checkout_lite_status` | bool | Module enabled |
 | `module_simple_checkout_lite_guest` | bool | Allow guest checkout |
 | `module_simple_checkout_lite_field_{name}` | enum | Field visibility (required/visible/hidden) |
-| `module_simple_checkout_lite_step_{name}` | bool | Step visibility |
+| `module_simple_checkout_lite_step_shipping_address` | bool | Show shipping address section |
+| `module_simple_checkout_lite_step_shipping_method` | bool | Show shipping method selection |
+| `module_simple_checkout_lite_step_payment_method` | bool | Show payment method selection |
+| `module_simple_checkout_lite_step_comment` | bool | Show order comment field |
 | `module_simple_checkout_lite_payment_default` | string | Default payment method code |
 | `module_simple_checkout_lite_shipping_default` | string | Default shipping method code |
+
+### Field Names
+`firstname`, `lastname`, `email`, `telephone`, `company`, `address_1`, `address_2`, `city`, `postcode`, `country`, `zone`
 
 ## Theme Integration
 
 The module includes templates for both `default` and `unishop2_free` themes. The unishop2_free template uses custom CSS classes that match the theme's design:
-- `.checkout-section` - section wrapper
-- `.checkout-section-header` - section title with icon
-- `.checkout-section-body` - section content
-- `.custom-checkbox` - styled checkboxes
-- `.btn-checkout` - primary action button
+
+### CSS Classes
+- `.checkout-section` - section wrapper with white background and border
+- `.checkout-section-header` - section title with green icon badge
+- `.checkout-section-body` - section content with padding
+- `.form-row` / `.form-col` - flex-based form layout (50% columns)
+- `.form-col-full` - full-width form column
+- `.custom-checkbox` - styled checkboxes with green checkmark
+- `.btn-checkout` - green primary action button
+- `.checkout-product` - product item in sidebar (image, name, options, price)
+- `.checkout-sidebar` - sticky sidebar with totals
+- `.table-totals` - totals table styling
+
+### Features
+- Clean layout without sidebars (`column_left`, `column_right` hidden)
+- No account menu in checkout (`content_top`, `content_bottom` cleared)
+- Responsive design (mobile-friendly)
+- Product list with thumbnails in order summary
+- Auto-select shipping/payment when steps are disabled
+- Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
+
+## Changelog
+
+### 1.3.0
+- Added product list display in "Ваш заказ" sidebar section
+- Shows product image, name, options, quantity, price, total
+
+### 1.2.1
+- Fixed form field layout with flex-based system
+- Fixed select field styling (Country, Zone, Region)
+
+### 1.2.0
+- Fixed validation when shipping/payment steps are disabled
+- Added `autoSelectShippingMethod()` for hidden shipping step
+- Added `totals()` endpoint for when payment is disabled
+
+### 1.1.0
+- Fixed empty payment form for simple methods (cod, free_checkout)
+- Removed account menu from checkout page
+- Added try-catch for payment/total calculations
+
+### 1.0.0
+- Initial release
+- One-page checkout with AJAX updates
+- Admin settings for field/step visibility
+- Support for default and unishop2_free themes

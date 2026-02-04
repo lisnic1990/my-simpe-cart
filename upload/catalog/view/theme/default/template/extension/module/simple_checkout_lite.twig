@@ -245,10 +245,29 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <i class="fa fa-shopping-cart"></i> Итого
+                <i class="fa fa-shopping-cart"></i> Ваш заказ
               </h4>
             </div>
             <div class="panel-body">
+              {# Products List #}
+              <div class="checkout-products-list">
+                {% for product in products %}
+                <div class="media" style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #eee;">
+                  <div class="media-left">
+                    <a href="{{ product.href }}"><img src="{{ product.image }}" alt="{{ product.name }}" style="width: 50px; height: 50px; object-fit: cover;" /></a>
+                  </div>
+                  <div class="media-body">
+                    <p style="margin: 0; font-weight: 500;"><a href="{{ product.href }}">{{ product.name }}</a></p>
+                    {% if product.option %}
+                    {% for option in product.option %}
+                    <small class="text-muted">{{ option.name }}: {{ option.value }}</small><br/>
+                    {% endfor %}
+                    {% endif %}
+                    <small>{{ product.quantity }} x {{ product.price }} = <strong>{{ product.total }}</strong></small>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
               <table class="table table-bordered" id="totals-table">
                 <tbody>
                   <tr>
