@@ -52,3 +52,7 @@ $_['error_payment']         = 'Warning: Payment method required!';
 $_['error_no_shipping']     = 'Warning: No Shipping options are available!';
 $_['error_address']         = 'Warning: Address required!';
 $_['error_guest']           = 'Warning: Customer information required!';
+
+// Totals (fallback)
+$_['text_sub_total']        = 'Sub-Total';
+$_['text_total']            = 'Total';

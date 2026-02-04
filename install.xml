@@ -2,7 +2,7 @@
 <modification>
     <name>Simple Checkout Lite</name>
     <code>simple_checkout_lite</code>
-    <version>1.3.0</version>
+    <version>1.3.1</version>
     <author>A.L.</author>
     <link>https://aeroclima.md</link>
 
@@ -57,9 +57,10 @@
             <add position="before"><![CDATA[
         // Simple Checkout Lite menu
         if ($this->user->hasPermission('access', 'extension/module/simple_checkout_lite')) {
-            $scl_menu = array();
-            $scl_menu[] = array(
-                'name'     => 'Настройки',
+            $data['menus'][] = array(
+                'id'       => 'menu-simple-checkout-lite',
+                'icon'     => 'fa-shopping-cart',
+                'name'     => 'Simple Checkout',
                 'href'     => $this->url->link('extension/module/simple_checkout_lite', 'user_token=' . $this->session->data['user_token'], true),
                 'children' => array()
             );

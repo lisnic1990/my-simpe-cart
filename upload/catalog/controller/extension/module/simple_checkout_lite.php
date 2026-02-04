@@ -93,7 +93,16 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $data['customer_email'] = $customer_info['email'];
             $data['customer_telephone'] = $customer_info['telephone'];
 
-            // Get default address
+            // Default address values
+            $data['customer_company'] = '';
+            $data['customer_address_1'] = '';
+            $data['customer_address_2'] = '';
+            $data['customer_city'] = '';
+            $data['customer_postcode'] = '';
+            $data['customer_country_id'] = $this->config->get('config_country_id');
+            $data['customer_zone_id'] = $this->config->get('config_zone_id');
+
+            // Get default address if exists
             $this->load->model('account/address');
             if ($this->customer->getAddressId()) {
                 $address_info = $this->model_account_address->getAddress($this->customer->getAddressId());
@@ -242,55 +251,66 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $this->load->language('extension/module/simple_checkout_lite');
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+            // Get POST values with defaults
+            $firstname = isset($this->request->post['firstname']) ? trim($this->request->post['firstname']) : '';
+            $lastname = isset($this->request->post['lastname']) ? trim($this->request->post['lastname']) : '';
+            $email = isset($this->request->post['email']) ? trim($this->request->post['email']) : '';
+            $telephone = isset($this->request->post['telephone']) ? trim($this->request->post['telephone']) : '';
+            $address_1 = isset($this->request->post['address_1']) ? trim($this->request->post['address_1']) : '';
+            $city = isset($this->request->post['city']) ? trim($this->request->post['city']) : '';
+            $postcode = isset($this->request->post['postcode']) ? trim($this->request->post['postcode']) : '';
+            $country_id = isset($this->request->post['country_id']) ? (int)$this->request->post['country_id'] : 0;
+            $zone_id = isset($this->request->post['zone_id']) ? (int)$this->request->post['zone_id'] : 0;
+
             // Validate fields
-            $fields = $this->config->get('module_simple_checkout_lite_field_firstname');
-            if ($fields == 'required' && (utf8_strlen(trim($this->request->post['firstname'])) < 1 || utf8_strlen(trim($this->request->post['firstname'])) > 32)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_firstname');
+            if ($field_config == 'required' && (utf8_strlen($firstname) < 1 || utf8_strlen($firstname) > 32)) {
                 $json['error']['firstname'] = $this->language->get('error_firstname');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_lastname');
-            if ($fields == 'required' && (utf8_strlen(trim($this->request->post['lastname'])) < 1 || utf8_strlen(trim($this->request->post['lastname'])) > 32)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_lastname');
+            if ($field_config == 'required' && (utf8_strlen($lastname) < 1 || utf8_strlen($lastname) > 32)) {
                 $json['error']['lastname'] = $this->language->get('error_lastname');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_email');
-            if ($fields == 'required' && (utf8_strlen($this->request->post['email']) > 96 || !filter_var($this->request->post['email'], FILTER_VALIDATE_EMAIL))) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_email');
+            if ($field_config == 'required' && (utf8_strlen($email) > 96 || !filter_var($email, FILTER_VALIDATE_EMAIL))) {
                 $json['error']['email'] = $this->language->get('error_email');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_telephone');
-            if ($fields == 'required' && (utf8_strlen($this->request->post['telephone']) < 3 || utf8_strlen($this->request->post['telephone']) > 32)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_telephone');
+            if ($field_config == 'required' && (utf8_strlen($telephone) < 3 || utf8_strlen($telephone) > 32)) {
                 $json['error']['telephone'] = $this->language->get('error_telephone');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_address_1');
-            if ($fields == 'required' && (utf8_strlen(trim($this->request->post['address_1'])) < 3 || utf8_strlen(trim($this->request->post['address_1'])) > 128)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_address_1');
+            if ($field_config == 'required' && (utf8_strlen($address_1) < 3 || utf8_strlen($address_1) > 128)) {
                 $json['error']['address_1'] = $this->language->get('error_address_1');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_city');
-            if ($fields == 'required' && (utf8_strlen(trim($this->request->post['city'])) < 2 || utf8_strlen(trim($this->request->post['city'])) > 128)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_city');
+            if ($field_config == 'required' && (utf8_strlen($city) < 2 || utf8_strlen($city) > 128)) {
                 $json['error']['city'] = $this->language->get('error_city');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_postcode');
-            if ($fields == 'required' && (utf8_strlen(trim($this->request->post['postcode'])) < 2 || utf8_strlen(trim($this->request->post['postcode'])) > 10)) {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_postcode');
+            if ($field_config == 'required' && (utf8_strlen($postcode) < 2 || utf8_strlen($postcode) > 10)) {
                 $json['error']['postcode'] = $this->language->get('error_postcode');
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_country');
-            if ($fields == 'required') {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_country');
+            if ($field_config == 'required') {
                 $this->load->model('localisation/country');
-                $country_info = $this->model_localisation_country->getCountry($this->request->post['country_id']);
+                $country_info = $this->model_localisation_country->getCountry($country_id);
                 if (!$country_info) {
                     $json['error']['country'] = $this->language->get('error_country');
                 }
             }
 
-            $fields = $this->config->get('module_simple_checkout_lite_field_zone');
-            if ($fields == 'required' && $this->request->post['country_id'] != '') {
+            $field_config = $this->config->get('module_simple_checkout_lite_field_zone');
+            if ($field_config == 'required' && $country_id > 0) {
                 $this->load->model('localisation/zone');
-                $zone_info = $this->model_localisation_zone->getZone($this->request->post['zone_id']);
+                $zone_info = $this->model_localisation_zone->getZone($zone_id);
                 if (!$zone_info) {
                     $json['error']['zone'] = $this->language->get('error_zone');
                 }
@@ -300,30 +320,33 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 // Save to session as guest
                 $this->session->data['guest'] = array(
                     'customer_group_id' => $this->config->get('config_customer_group_id'),
-                    'firstname'         => $this->request->post['firstname'],
-                    'lastname'          => $this->request->post['lastname'],
-                    'email'             => $this->request->post['email'],
-                    'telephone'         => $this->request->post['telephone'],
+                    'firstname'         => $firstname,
+                    'lastname'          => $lastname,
+                    'email'             => $email,
+                    'telephone'         => $telephone,
                     'custom_field'      => array()
                 );
 
+                $company = isset($this->request->post['company']) ? trim($this->request->post['company']) : '';
+                $address_2 = isset($this->request->post['address_2']) ? trim($this->request->post['address_2']) : '';
+
                 $this->session->data['payment_address'] = array(
-                    'firstname'         => $this->request->post['firstname'],
-                    'lastname'          => $this->request->post['lastname'],
-                    'company'           => isset($this->request->post['company']) ? $this->request->post['company'] : '',
-                    'address_1'         => isset($this->request->post['address_1']) ? $this->request->post['address_1'] : '',
-                    'address_2'         => isset($this->request->post['address_2']) ? $this->request->post['address_2'] : '',
-                    'postcode'          => isset($this->request->post['postcode']) ? $this->request->post['postcode'] : '',
-                    'city'              => isset($this->request->post['city']) ? $this->request->post['city'] : '',
-                    'country_id'        => isset($this->request->post['country_id']) ? $this->request->post['country_id'] : 0,
-                    'zone_id'           => isset($this->request->post['zone_id']) ? $this->request->post['zone_id'] : 0,
+                    'firstname'         => $firstname,
+                    'lastname'          => $lastname,
+                    'company'           => $company,
+                    'address_1'         => $address_1,
+                    'address_2'         => $address_2,
+                    'postcode'          => $postcode,
+                    'city'              => $city,
+                    'country_id'        => $country_id,
+                    'zone_id'           => $zone_id,
                     'custom_field'      => array()
                 );
 
                 // Get country and zone names
-                if (isset($this->request->post['country_id'])) {
+                if ($country_id > 0) {
                     $this->load->model('localisation/country');
-                    $country_info = $this->model_localisation_country->getCountry($this->request->post['country_id']);
+                    $country_info = $this->model_localisation_country->getCountry($country_id);
                     if ($country_info) {
                         $this->session->data['payment_address']['country'] = $country_info['name'];
                         $this->session->data['payment_address']['iso_code_2'] = $country_info['iso_code_2'];
@@ -332,9 +355,9 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                     }
                 }
 
-                if (isset($this->request->post['zone_id'])) {
+                if ($zone_id > 0) {
                     $this->load->model('localisation/zone');
-                    $zone_info = $this->model_localisation_zone->getZone($this->request->post['zone_id']);
+                    $zone_info = $this->model_localisation_zone->getZone($zone_id);
                     if ($zone_info) {
                         $this->session->data['payment_address']['zone'] = $zone_info['name'];
                         $this->session->data['payment_address']['zone_code'] = $zone_info['code'];
@@ -704,9 +727,12 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             foreach ($results as $result) {
                 if ($this->config->get('total_' . $result['code'] . '_status')) {
-                    $this->load->model('extension/total/' . $result['code']);
-
-                    $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                    try {
+                        $this->load->model('extension/total/' . $result['code']);
+                        $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                    } catch (Exception $e) {
+                        // Skip this total if error
+                    }
                 }
             }
 

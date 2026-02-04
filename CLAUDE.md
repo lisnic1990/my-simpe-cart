@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.3.0
+**Версия:** 1.3.1
 
 ## Architecture
 
@@ -122,6 +122,13 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
 
 ## Changelog
+
+### 1.3.1
+- Fixed: Admin menu item not appearing (OCMOD bug)
+- Fixed: Undefined variables for logged-in users without default address
+- Fixed: Undefined index errors in save() when fields are hidden
+- Added: try-catch in confirm() for totals calculation
+- Added: Missing language keys (text_sub_total, text_total)
 
 ### 1.3.0
 - Added product list display in "Ваш заказ" sidebar section
