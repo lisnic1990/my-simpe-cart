@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.3.1
+**Версия:** 1.3.2
 
 ## Architecture
 
@@ -16,11 +16,11 @@ install.xml              # OCMOD XML модификатор (основной ф
 upload/
 ├── admin/
 │   ├── controller/extension/module/simple_checkout_lite.php
-│   ├── language/{ru-ru,en-gb}/extension/module/simple_checkout_lite.php
+│   ├── language/{ru-ru,en-gb,ro-ro}/extension/module/simple_checkout_lite.php
 │   └── view/template/extension/module/simple_checkout_lite.twig
 ├── catalog/
 │   ├── controller/extension/module/simple_checkout_lite.php
-│   ├── language/{ru-ru,en-gb}/extension/module/simple_checkout_lite.php
+│   ├── language/{ru-ru,en-gb,ro-ro}/extension/module/simple_checkout_lite.php
 │   └── view/theme/
 │       ├── default/template/extension/module/simple_checkout_lite.twig
 │       └── unishop2_free/template/extension/module/
@@ -122,6 +122,12 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
 
 ## Changelog
+
+### 1.3.2
+- Added: Romanian language (ro-ro)
+- Fixed: Agreement checkbox text layout (wrapping issue)
+- Changed: Agreement text format - link on "Условия соглашения" / "Terms & Conditions"
+- Fixed: error_agree message showing %s placeholder
 
 ### 1.3.1
 - Fixed: Admin menu item not appearing (OCMOD bug)
