@@ -552,6 +552,7 @@
             save: '{{ action_save }}',
             shipping: '{{ action_shipping }}',
             payment: '{{ action_payment }}',
+            totals: '{{ action_totals }}',
             confirm: '{{ action_confirm }}',
             zone: '{{ action_zone }}'
         },
@@ -635,10 +636,16 @@
             this.saveCustomerData(function(result) {
                 if (SimpleCheckoutLite.shipping_required && SimpleCheckoutLite.show_shipping_method) {
                     self.loadShippingMethods(function() {
-                        self.loadPaymentMethods();
+                        if (SimpleCheckoutLite.show_payment_method) {
+                            self.loadPaymentMethods();
+                        } else {
+                            self.loadTotals();
+                        }
                     });
-                } else {
+                } else if (SimpleCheckoutLite.show_payment_method) {
                     self.loadPaymentMethods();
+                } else {
+                    self.loadTotals();
                 }
             });
         },
@@ -793,12 +800,13 @@
             });
         },
 
-        loadTotals: function() {
+        loadTotals: function(callback) {
             // Load totals separately if payment methods are hidden
             $.ajax({
-                url: SimpleCheckoutLite.urls.payment,
+                url: SimpleCheckoutLite.urls.totals,
                 dataType: 'json',
                 success: function(json) {
+                    console.log('Totals response:', json);
                     if (json && json.totals) {
                         var totalsHtml = '';
                         for (var i = 0; i < json.totals.length; i++) {
@@ -809,6 +817,11 @@
                         }
                         $('#totals-table tbody').html(totalsHtml);
                     }
+                    if (callback) callback(json || {});
+                },
+                error: function(xhr, status, error) {
+                    console.error('Totals error:', error);
+                    if (callback) callback({error: true});
                 }
             });
         },

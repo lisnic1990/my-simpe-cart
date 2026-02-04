@@ -133,6 +133,7 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $data['action_save'] = $this->url->link('extension/module/simple_checkout_lite/save', '', true);
         $data['action_shipping'] = $this->url->link('extension/module/simple_checkout_lite/shipping', '', true);
         $data['action_payment'] = $this->url->link('extension/module/simple_checkout_lite/payment', '', true);
+        $data['action_totals'] = $this->url->link('extension/module/simple_checkout_lite/totals', '', true);
         $data['action_confirm'] = $this->url->link('extension/module/simple_checkout_lite/confirm', '', true);
         $data['action_zone'] = $this->url->link('extension/module/simple_checkout_lite/zone', '', true);
 
@@ -164,11 +165,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         $data['agree'] = $this->config->get('config_checkout_id');
 
-        // No sidebars for checkout - full width layout
+        // No sidebars and no content modules for checkout - clean layout
         $data['column_left'] = '';
         $data['column_right'] = '';
-        $data['content_top'] = $this->load->controller('common/content_top');
-        $data['content_bottom'] = $this->load->controller('common/content_bottom');
+        $data['content_top'] = '';
+        $data['content_bottom'] = '';
         $data['footer'] = $this->load->controller('common/footer');
         $data['header'] = $this->load->controller('common/header');
 
@@ -501,6 +502,22 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 // Get totals HTML
                 $json['totals'] = $this->getTotalsHtml();
             }
+        } catch (Exception $e) {
+            $json['error'] = 'Error: ' . $e->getMessage();
+        }
+
+        $this->response->addHeader('Content-Type: application/json');
+        $this->response->setOutput(json_encode($json));
+    }
+
+    /**
+     * Get totals only (AJAX) - used when payment methods are hidden
+     */
+    public function totals() {
+        $json = array();
+
+        try {
+            $json['totals'] = $this->getTotalsHtml();
         } catch (Exception $e) {
             $json['error'] = 'Error: ' . $e->getMessage();
         }
@@ -895,12 +912,23 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         if (isset($this->session->data['payment_method']['code'])) {
             $code = $this->session->data['payment_method']['code'];
 
-            // Try to get payment form
+            // For free_checkout and similar simple methods - confirm directly
+            $simple_payments = array('free_checkout', 'cod', 'cheque', 'bank_transfer');
+
+            if (in_array($code, $simple_payments)) {
+                $this->load->model('checkout/order');
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
+
+                $this->response->redirect($this->url->link('checkout/success', '', true));
+                return;
+            }
+
+            // Try to get payment form for other methods
             $this->load->language('extension/payment/' . $code);
 
             $data['payment'] = $this->load->controller('extension/payment/' . $code);
 
-            if ($data['payment']) {
+            if ($data['payment'] && trim(strip_tags($data['payment']))) {
                 $this->load->language('checkout/checkout');
 
                 $data['heading_title'] = $this->language->get('text_checkout');
@@ -915,8 +943,8 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                     'href' => $this->url->link('checkout/checkout', '', true)
                 );
 
-                $data['column_left'] = $this->load->controller('common/column_left');
-                $data['column_right'] = $this->load->controller('common/column_right');
+                $data['column_left'] = '';
+                $data['column_right'] = '';
                 $data['content_top'] = $this->load->controller('common/content_top');
                 $data['content_bottom'] = $this->load->controller('common/content_bottom');
                 $data['footer'] = $this->load->controller('common/footer');
@@ -931,6 +959,9 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 $this->response->redirect($this->url->link('checkout/success', '', true));
             }
         } else {
+            $this->load->model('checkout/order');
+            $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
+
             $this->response->redirect($this->url->link('checkout/success', '', true));
         }
     }
