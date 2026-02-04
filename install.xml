@@ -3,8 +3,8 @@
     <name>Simple Checkout Lite</name>
     <code>simple_checkout_lite</code>
     <version>1.0.0</version>
-    <author>Developer</author>
-    <link>https://example.com</link>
+    <author>A.L.</author>
+    <link>https://aeroclima.md</link>
 
     <!-- Редирект стандартного checkout на Simple Checkout Lite -->
     <file path="catalog/controller/checkout/checkout.php">
