@@ -53,8 +53,9 @@
     <!-- Добавление пункта меню в админку -->
     <file path="admin/controller/common/column_left.php">
         <operation>
-            <search><![CDATA[$data['menus'][] = array(]]></search>
-            <add position="before"><![CDATA[
+            <search><![CDATA[$data['menus'] = array();]]></search>
+            <add position="after"><![CDATA[
+
         // Simple Checkout Lite menu
         if ($this->user->hasPermission('access', 'extension/module/simple_checkout_lite')) {
             $data['menus'][] = array(
