@@ -55,6 +55,33 @@
   padding: 20px;
 }
 
+/* Form row/col flex layout */
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -10px;
+  margin-right: -10px;
+  margin-bottom: 5px;
+}
+
+.form-col {
+  flex: 1 1 calc(50% - 20px);
+  min-width: 200px;
+  padding-left: 10px;
+  padding-right: 10px;
+  box-sizing: border-box;
+}
+
+.form-col-full {
+  flex: 1 1 100%;
+}
+
+@media (max-width: 576px) {
+  .form-col {
+    flex: 1 1 100%;
+  }
+}
+
 .checkout-section .form-group {
   margin-bottom: 15px;
 }
@@ -63,6 +90,7 @@
   font-weight: 500;
   color: #555;
   margin-bottom: 5px;
+  display: block;
 }
 
 .checkout-section .form-control {
@@ -70,6 +98,9 @@
   border: 1px solid #ddd;
   padding: 10px 15px;
   height: auto;
+  min-height: 44px;
+  width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
@@ -208,6 +239,12 @@
   letter-spacing: 1px;
   transition: all 0.3s;
   color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  width: 100%;
 }
 
 .btn-checkout:hover,
@@ -220,6 +257,33 @@
 .btn-checkout:disabled {
   background: #ccc;
   border-color: #ccc;
+}
+
+/* Fix select fields (Country, Zone) */
+.checkout-section select.form-control {
+  height: auto;
+  min-height: 46px;
+  padding: 10px 15px;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  padding-right: 40px;
+}
+
+/* Fix input fields alignment */
+.checkout-section input.form-control,
+.checkout-section select.form-control,
+.checkout-section textarea.form-control {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix telephone field */
+#input-telephone {
+  width: 100%;
 }
 
 /* Alert styles */
@@ -280,62 +344,63 @@
                   <span class="checkout-section-title">{{ text_customer_info }}</span>
                 </div>
                 <div class="checkout-section-body">
-                  <div class="row">
+                  {# Row 1: First Name + Last Name #}
+                  <div class="form-row">
                     {# First Name #}
                     {% if fields.firstname != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.firstname == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-firstname">{{ entry_firstname }}</label>
-                        <input type="text" name="firstname" value="{{ customer_firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="firstname" value="{{ customer_firstname }}" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
 
                     {# Last Name #}
                     {% if fields.lastname != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.lastname == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-lastname">{{ entry_lastname }}</label>
-                        <input type="text" name="lastname" value="{{ customer_lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="lastname" value="{{ customer_lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
+                  </div>
 
+                  {# Row 2: Email + Telephone #}
+                  <div class="form-row">
                     {# Email #}
                     {% if fields.email != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.email == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-email">{{ entry_email }}</label>
-                        <input type="email" name="email" value="{{ customer_email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="email" name="email" value="{{ customer_email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
 
                     {# Telephone #}
                     {% if fields.telephone != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.telephone == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-telephone">{{ entry_telephone }}</label>
-                        <input type="tel" name="telephone" value="{{ customer_telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control input-lg" />
-                        <div class="field-error"></div>
-                      </div>
-                    </div>
-                    {% endif %}
-
-                    {# Company #}
-                    {% if fields.company != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
-                      <div class="form-group{% if fields.company == 'required' %} required{% endif %}">
-                        <label class="control-label" for="input-company">{{ entry_company }}</label>
-                        <input type="text" name="company" value="{{ customer_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="tel" name="telephone" value="{{ customer_telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
                   </div>
+
+                  {# Row 3: Company (if visible) #}
+                  {% if fields.company != 'hidden' %}
+                  <div class="form-row">
+                    <div class="form-col form-col-full">
+                      <div class="form-group{% if fields.company == 'required' %} required{% endif %}">
+                        <label class="control-label" for="input-company">{{ entry_company }}</label>
+                        <input type="text" name="company" value="{{ customer_company }}" placeholder="{{ entry_company }}" id="input-company" class="form-control" />
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
                 </div>
               </div>
 
@@ -347,57 +412,58 @@
                   <span class="checkout-section-title">{{ text_shipping_address }}</span>
                 </div>
                 <div class="checkout-section-body">
-                  <div class="row">
-                    {# Address 1 #}
-                    {% if fields.address_1 != 'hidden' %}
-                    <div class="col-sm-12">
+                  {# Row 1: Address 1 #}
+                  {% if fields.address_1 != 'hidden' %}
+                  <div class="form-row">
+                    <div class="form-col form-col-full">
                       <div class="form-group{% if fields.address_1 == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-address-1">{{ entry_address_1 }}</label>
-                        <input type="text" name="address_1" value="{{ customer_address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="address_1" value="{{ customer_address_1 }}" placeholder="{{ entry_address_1 }}" id="input-address-1" class="form-control" />
                       </div>
                     </div>
-                    {% endif %}
+                  </div>
+                  {% endif %}
 
-                    {# Address 2 #}
-                    {% if fields.address_2 != 'hidden' %}
-                    <div class="col-sm-12">
+                  {# Row 2: Address 2 #}
+                  {% if fields.address_2 != 'hidden' %}
+                  <div class="form-row">
+                    <div class="form-col form-col-full">
                       <div class="form-group{% if fields.address_2 == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-address-2">{{ entry_address_2 }}</label>
-                        <input type="text" name="address_2" value="{{ customer_address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="address_2" value="{{ customer_address_2 }}" placeholder="{{ entry_address_2 }}" id="input-address-2" class="form-control" />
                       </div>
                     </div>
-                    {% endif %}
+                  </div>
+                  {% endif %}
 
-                    {# City #}
+                  {# Row 3: City + Postcode #}
+                  <div class="form-row">
                     {% if fields.city != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.city == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-city">{{ entry_city }}</label>
-                        <input type="text" name="city" value="{{ customer_city }}" placeholder="{{ entry_city }}" id="input-city" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="city" value="{{ customer_city }}" placeholder="{{ entry_city }}" id="input-city" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
 
-                    {# Postcode #}
                     {% if fields.postcode != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.postcode == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-postcode">{{ entry_postcode }}</label>
-                        <input type="text" name="postcode" value="{{ customer_postcode }}" placeholder="{{ entry_postcode }}" id="input-postcode" class="form-control input-lg" />
-                        <div class="field-error"></div>
+                        <input type="text" name="postcode" value="{{ customer_postcode }}" placeholder="{{ entry_postcode }}" id="input-postcode" class="form-control" />
                       </div>
                     </div>
                     {% endif %}
+                  </div>
 
-                    {# Country #}
+                  {# Row 4: Country + Zone #}
+                  <div class="form-row">
                     {% if fields.country != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.country == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-country">{{ entry_country }}</label>
-                        <select name="country_id" id="input-country" class="form-control input-lg">
+                        <select name="country_id" id="input-country" class="form-control">
                           <option value="">{{ entry_country }}</option>
                           {% for country in countries %}
                           {% if country.country_id == customer_country_id %}
@@ -407,19 +473,16 @@
                           {% endif %}
                           {% endfor %}
                         </select>
-                        <div class="field-error"></div>
                       </div>
                     </div>
                     {% endif %}
 
-                    {# Zone #}
                     {% if fields.zone != 'hidden' %}
-                    <div class="col-sm-6 col-xs-12">
+                    <div class="form-col">
                       <div class="form-group{% if fields.zone == 'required' %} required{% endif %}">
                         <label class="control-label" for="input-zone">{{ entry_zone }}</label>
-                        <select name="zone_id" id="input-zone" class="form-control input-lg" data-zone-id="{{ customer_zone_id }}">
+                        <select name="zone_id" id="input-zone" class="form-control" data-zone-id="{{ customer_zone_id }}">
                         </select>
-                        <div class="field-error"></div>
                       </div>
                     </div>
                     {% endif %}
@@ -427,7 +490,7 @@
 
                   {# Same address checkbox #}
                   {% if show_shipping_address %}
-                  <div class="form-group">
+                  <div class="form-group" style="margin-top: 15px;">
                     <div class="checkbox custom-checkbox">
                       <label>
                         <input type="checkbox" name="shipping_address" value="1" checked="checked" />
