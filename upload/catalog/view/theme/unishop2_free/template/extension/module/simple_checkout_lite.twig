@@ -128,9 +128,10 @@
 /* Custom checkbox for unishop2 */
 .custom-checkbox label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
   font-weight: normal;
+  line-height: 1.4;
 }
 
 .custom-checkbox input[type="checkbox"] {
@@ -140,9 +141,11 @@
 .custom-checkbox .checkbox-icon {
   width: 20px;
   height: 20px;
+  min-width: 20px;
   border: 2px solid #ddd;
   border-radius: 3px;
   margin-right: 10px;
+  margin-top: 2px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -160,6 +163,19 @@
   font-family: FontAwesome;
   color: #fff;
   font-size: 12px;
+}
+
+/* Agreement text */
+.checkout-agree .custom-checkbox label {
+  align-items: flex-start;
+}
+
+.checkout-agree .checkbox-text {
+  flex: 1;
+}
+
+.checkout-agree .checkbox-text a {
+  white-space: nowrap;
 }
 
 /* Shipping and Payment methods */
@@ -566,7 +582,7 @@
                       <label>
                         <input type="checkbox" name="shipping_address" value="1" checked="checked" />
                         <span class="checkbox-icon"></span>
-                        {{ entry_same_address }}
+                        <span class="checkbox-text">{{ entry_same_address }}</span>
                       </label>
                     </div>
                   </div>
@@ -679,7 +695,7 @@
                     <label>
                       <input type="checkbox" name="agree" value="1" />
                       <span class="checkbox-icon"></span>
-                      {{ text_agree }}
+                      <span class="checkbox-text">{{ text_agree }}</span>
                     </label>
                   </div>
                 </div>
