@@ -12,6 +12,17 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             return;
         }
 
+        // Fix language switching: cookie has the new language, but URL prefix
+        // may still have the old one, causing SEO URL handler to reset language.
+        // Detect mismatch and redirect to URL with correct language prefix.
+        if (isset($this->request->cookie['language']) && isset($this->session->data['language'])) {
+            if ($this->request->cookie['language'] != $this->session->data['language']) {
+                $this->session->data['language'] = $this->request->cookie['language'];
+                $this->response->redirect($this->url->link('extension/module/simple_checkout_lite', '', true));
+                return;
+            }
+        }
+
         // Check cart has products
         if (!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) {
             $this->response->redirect($this->url->link('checkout/cart', '', true));
