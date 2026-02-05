@@ -12,17 +12,6 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             return;
         }
 
-        // Fix language switching: cookie has the new language, but URL prefix
-        // may still have the old one, causing SEO URL handler to reset language.
-        // Detect mismatch and redirect to URL with correct language prefix.
-        if (isset($this->request->cookie['language']) && isset($this->session->data['language'])) {
-            if ($this->request->cookie['language'] != $this->session->data['language']) {
-                $this->session->data['language'] = $this->request->cookie['language'];
-                $this->response->redirect($this->url->link('extension/module/simple_checkout_lite', '', true));
-                return;
-            }
-        }
-
         // Check cart has products
         if (!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) {
             $this->response->redirect($this->url->link('checkout/cart', '', true));
@@ -228,13 +217,19 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             );
         }
 
-        // No sidebars and no content modules for checkout - clean layout
-        $data['column_left'] = '';
-        $data['column_right'] = '';
-        $data['content_top'] = '';
-        $data['content_bottom'] = '';
-        $data['footer'] = $this->load->controller('common/footer');
+        // Подключаем стандартные компоненты UniShop2
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['column_right'] = $this->load->controller('common/column_right');
+        $data['content_top'] = $this->load->controller('common/content_top');
+        $data['content_bottom'] = $this->load->controller('common/content_bottom');
+        
+        // Важно: UniShop2 часто вешает инициализацию своих JS-функций на наличие этих переменных
         $data['header'] = $this->load->controller('common/header');
+        $data['footer'] = $this->load->controller('common/footer');
+
+        // Отключаем вывод колонок в шаблоне, если дизайн "чистый", 
+        // но контроллеры вызвать нужно для работы OCMOD-модификаторов!
+        // Если вы их занулили строками — модификаторы в Header могут не сработать.
 
         $this->response->setOutput($this->load->view('extension/module/simple_checkout_lite', $data));
     }
