@@ -497,7 +497,7 @@
               </div>
 
               {# Address Section - Unishop2 style #}
-              {% if shipping_required or fields.address_1 != 'hidden' or fields.city != 'hidden' or fields.country != 'hidden' %}
+              {% if shipping_required or fields.address_1 != 'hidden' or fields.city != 'hidden' or fields.country != 'hidden' or fields.zone != 'hidden' %}
               <div class="checkout-section checkout-address">
                 <div class="checkout-section-header">
                   <span class="checkout-section-icon"><i class="fa fa-map-marker"></i></span>
@@ -567,6 +567,8 @@
                         </select>
                       </div>
                     </div>
+                    {% else %}
+                    <input type="hidden" name="country_id" id="input-country" value="{{ customer_country_id }}" />
                     {% endif %}
 
                     {% if fields.zone != 'hidden' %}
@@ -577,6 +579,8 @@
                         </select>
                       </div>
                     </div>
+                    {% else %}
+                    <input type="hidden" name="zone_id" id="input-zone" value="{{ customer_zone_id }}" data-zone-id="{{ customer_zone_id }}" />
                     {% endif %}
                   </div>
 
@@ -596,6 +600,11 @@
                   {% endif %}
                 </div>
               </div>
+              {% else %}
+              {# Address section hidden - still need country/zone for shipping calculations #}
+              <input type="hidden" name="country_id" id="input-country" value="{{ customer_country_id }}" />
+              <input type="hidden" name="zone_id" id="input-zone" value="{{ customer_zone_id }}" data-zone-id="{{ customer_zone_id }}" />
+              <input type="hidden" name="shipping_address" value="1" />
               {% endif %}
 
               {# Shipping Method - Unishop2 style #}
@@ -734,6 +743,8 @@
             payment: '{{ action_payment }}',
             totals: '{{ action_totals }}',
             confirm: '{{ action_confirm }}',
+            setShipping: '{{ action_set_shipping }}',
+            setPayment: '{{ action_set_payment }}',
             zone: '{{ action_zone }}'
         },
         shipping_required: {{ shipping_required ? 'true' : 'false' }},
@@ -801,9 +812,17 @@
         loadZones: function() {
             var country_id = $('#input-country').val();
             var zone_id = $('#input-zone').data('zone-id');
+            var $zone = $('#input-zone');
 
             if (!country_id) {
-                $('#input-zone').html('<option value="">-- Выберите --</option>');
+                if ($zone.is('select')) {
+                    $zone.html('<option value="">-- Выберите --</option>');
+                }
+                return;
+            }
+
+            // If zone is a hidden input, keep its default value
+            if (!$zone.is('select')) {
                 return;
             }
 
@@ -821,7 +840,7 @@
                             }
                         }
                     }
-                    $('#input-zone').html(html);
+                    $zone.html(html);
                 },
                 error: function(xhr, status, error) {
                     console.error('Zone load error:', error);
@@ -1030,7 +1049,7 @@
             var self = this;
 
             $.ajax({
-                url: 'index.php?route=extension/module/simple_checkout_lite/setShipping',
+                url: SimpleCheckoutLite.urls.setShipping,
                 type: 'POST',
                 data: { shipping_method: method },
                 dataType: 'json',
@@ -1044,7 +1063,7 @@
 
         setPaymentMethod: function(method) {
             $.ajax({
-                url: 'index.php?route=extension/module/simple_checkout_lite/setPayment',
+                url: SimpleCheckoutLite.urls.setPayment,
                 type: 'POST',
                 data: { payment_method: method },
                 dataType: 'json',

@@ -152,6 +152,8 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $data['action_payment'] = $this->url->link('extension/module/simple_checkout_lite/payment', '', true);
         $data['action_totals'] = $this->url->link('extension/module/simple_checkout_lite/totals', '', true);
         $data['action_confirm'] = $this->url->link('extension/module/simple_checkout_lite/confirm', '', true);
+        $data['action_set_shipping'] = $this->url->link('extension/module/simple_checkout_lite/setShipping', '', true);
+        $data['action_set_payment'] = $this->url->link('extension/module/simple_checkout_lite/setPayment', '', true);
         $data['action_zone'] = $this->url->link('extension/module/simple_checkout_lite/zone', '', true);
 
         // Language strings
@@ -269,6 +271,24 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             $postcode = isset($this->request->post['postcode']) ? trim($this->request->post['postcode']) : '';
             $country_id = isset($this->request->post['country_id']) ? (int)$this->request->post['country_id'] : 0;
             $zone_id = isset($this->request->post['zone_id']) ? (int)$this->request->post['zone_id'] : 0;
+
+            // If country field is hidden and no value posted, use module default
+            $field_country_config = $this->config->get('module_simple_checkout_lite_field_country');
+            if ($field_country_config == 'hidden' && !$country_id) {
+                $country_id = (int)$this->config->get('module_simple_checkout_lite_country_default');
+                if (!$country_id) {
+                    $country_id = (int)$this->config->get('config_country_id');
+                }
+            }
+
+            // If zone field is hidden and no value posted, use module default
+            $field_zone_config = $this->config->get('module_simple_checkout_lite_field_zone');
+            if ($field_zone_config == 'hidden' && !$zone_id) {
+                $zone_id = (int)$this->config->get('module_simple_checkout_lite_zone_default');
+                if (!$zone_id) {
+                    $zone_id = (int)$this->config->get('config_zone_id');
+                }
+            }
 
             // Validate fields
             $field_config = $this->config->get('module_simple_checkout_lite_field_firstname');
@@ -480,9 +500,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             if (!isset($json['error'])) {
                 // Totals
-                $totals = array();
-                $taxes = $this->cart->getTaxes();
-                $total = 0;
+                $total_data = array(
+                    'totals' => array(),
+                    'taxes'  => $this->cart->getTaxes(),
+                    'total'  => 0
+                );
 
                 $this->load->model('setting/extension');
 
@@ -500,12 +522,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                     if ($this->config->get('total_' . $result['code'] . '_status')) {
                         try {
                             $this->load->model('extension/total/' . $result['code']);
-                            $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                            $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
                         } catch (Exception $e) {
                             // Skip this total if error
                         }
                     }
                 }
+
+                $total = $total_data['total'];
 
                 // Payment Methods
                 $method_data = array();
@@ -718,9 +742,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         if (!isset($json['error'])) {
             $order_data = array();
 
-            $totals = array();
-            $taxes = $this->cart->getTaxes();
-            $total = 0;
+            $total_data = array(
+                'totals' => array(),
+                'taxes'  => $this->cart->getTaxes(),
+                'total'  => 0
+            );
 
             $this->load->model('setting/extension');
 
@@ -738,12 +764,15 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 if ($this->config->get('total_' . $result['code'] . '_status')) {
                     try {
                         $this->load->model('extension/total/' . $result['code']);
-                        $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                        $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
                     } catch (Exception $e) {
                         // Skip this total if error
                     }
                 }
             }
+
+            $totals = $total_data['totals'];
+            $total = $total_data['total'];
 
             $sort_order = array();
 
@@ -1090,9 +1119,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
      * Get totals HTML (AJAX helper)
      */
     private function getTotalsHtml() {
-        $totals = array();
-        $taxes = $this->cart->getTaxes();
-        $total = 0;
+        $total_data = array(
+            'totals' => array(),
+            'taxes'  => $this->cart->getTaxes(),
+            'total'  => 0
+        );
 
         // Make sure currency is set
         if (!isset($this->session->data['currency'])) {
@@ -1115,12 +1146,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             if ($this->config->get('total_' . $result['code'] . '_status')) {
                 try {
                     $this->load->model('extension/total/' . $result['code']);
-                    $this->{'model_extension_total_' . $result['code']}->getTotal($totals, $taxes, $total);
+                    $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
                 } catch (Exception $e) {
                     // Skip
                 }
             }
         }
+
+        $totals = $total_data['totals'];
 
         // If no totals from extensions, calculate basic totals
         if (empty($totals)) {
