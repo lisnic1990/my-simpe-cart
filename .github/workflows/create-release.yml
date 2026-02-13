@@ -39,16 +39,14 @@ jobs:
           rm -rf .github
           rm -f .gitignore .gitattributes
           
-          cat > RELEASE_INFO.txt << 'EOFINFO'
-          OcStore Release Archive
-          =======================
-          Branch: ${{ steps.commit.outputs.branch }}
-          Commit: ${{ github.sha }}
-          Short SHA: ${{ steps.commit.outputs.sha_short }}
-          Author: ${{ github.actor }}
-          Date: ${{ steps.commit.outputs.date }}
-          Message: ${{ github.event.head_commit.message }}
-EOFINFO
+          echo "OcStore Release Archive" > RELEASE_INFO.txt
+          echo "=======================" >> RELEASE_INFO.txt
+          echo "Branch: ${{ steps.commit.outputs.branch }}" >> RELEASE_INFO.txt
+          echo "Commit: ${{ github.sha }}" >> RELEASE_INFO.txt
+          echo "Short SHA: ${{ steps.commit.outputs.sha_short }}" >> RELEASE_INFO.txt
+          echo "Author: ${{ github.actor }}" >> RELEASE_INFO.txt
+          echo "Date: ${{ steps.commit.outputs.date }}" >> RELEASE_INFO.txt
+          echo "Message: ${{ github.event.head_commit.message }}" >> RELEASE_INFO.txt
           
       - name: Create ZIP archive
         run: |
@@ -88,20 +86,18 @@ EOFINFO
           
           cp "$ARCHIVE_NAME" latest.zip
           
-          cat > MANIFEST.json << 'EOFJSON'
-          {
-            "latest": {
-              "filename": "$ARCHIVE_NAME",
-              "branch": "${{ steps.commit.outputs.branch }}",
-              "commit": "${{ github.sha }}",
-              "short_sha": "${{ steps.commit.outputs.sha_short }}",
-              "timestamp": "${{ steps.commit.outputs.timestamp }}",
-              "date": "${{ steps.commit.outputs.date }}",
-              "author": "${{ github.actor }}",
-              "message": $(echo '${{ github.event.head_commit.message }}' | jq -R -s .)
-            }
-          }
-EOFJSON
+          echo "{" > MANIFEST.json
+          echo "  \"latest\": {" >> MANIFEST.json
+          echo "    \"filename\": \"$ARCHIVE_NAME\"," >> MANIFEST.json
+          echo "    \"branch\": \"${{ steps.commit.outputs.branch }}\"," >> MANIFEST.json
+          echo "    \"commit\": \"${{ github.sha }}\"," >> MANIFEST.json
+          echo "    \"short_sha\": \"${{ steps.commit.outputs.sha_short }}\"," >> MANIFEST.json
+          echo "    \"timestamp\": \"${{ steps.commit.outputs.timestamp }}\"," >> MANIFEST.json
+          echo "    \"date\": \"${{ steps.commit.outputs.date }}\"," >> MANIFEST.json
+          echo "    \"author\": \"${{ github.actor }}\"," >> MANIFEST.json
+          echo "    \"message\": \"${{ github.event.head_commit.message }}\"" >> MANIFEST.json
+          echo "  }" >> MANIFEST.json
+          echo "}" >> MANIFEST.json
           
           sha256sum "$ARCHIVE_NAME" > "$ARCHIVE_NAME.sha256"
           sha256sum latest.zip > latest.zip.sha256
@@ -113,17 +109,17 @@ EOFJSON
           git config user.email "actions@github.com"
           
           git add .
-          git commit -m "🚀 Release: ${{ steps.commit.outputs.branch }}@${{ steps.commit.outputs.sha_short }} - ${{ steps.commit.outputs.timestamp }}"
+          git commit -m "Release: ${{ steps.commit.outputs.branch }}@${{ steps.commit.outputs.sha_short }} - ${{ steps.commit.outputs.timestamp }}"
           git push origin release
           
       - name: Create deployment summary
         run: |
-          echo "## ✅ Release Archive Created" >> $GITHUB_STEP_SUMMARY
+          echo "## Release Archive Created" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Archive Name:** \`$ARCHIVE_NAME\`" >> $GITHUB_STEP_SUMMARY
           echo "**Branch:** ${{ steps.commit.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
           echo "**Commit:** ${{ steps.commit.outputs.sha_short }}" >> $GITHUB_STEP_SUMMARY
           echo "**Timestamp:** ${{ steps.commit.outputs.timestamp }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "📦 Archive is available in the \`release\` branch" >> $GITHUB_STEP_SUMMARY
-          echo "🔗 Direct link: https://github.com/${{ github.repository }}/raw/release/latest.zip" >> $GITHUB_STEP_SUMMARY
+          echo "Archive is available in the release branch" >> $GITHUB_STEP_SUMMARY
+          echo "Direct link: https://github.com/${{ github.repository }}/raw/release/latest.zip" >> $GITHUB_STEP_SUMMARY
