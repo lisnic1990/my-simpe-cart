@@ -56,3 +56,13 @@ $_['error_guest']           = 'Atenție: Informațiile clientului sunt obligator
 // Totals (fallback)
 $_['text_sub_total']        = 'Subtotal';
 $_['text_total']            = 'Total';
+
+// JS text (used in external JS via config)
+$_['text_order_summary']    = 'Comanda dvs.';
+$_['text_select_option']    = '-- Selectați --';
+$_['text_processing']       = 'Procesare...';
+$_['text_no_shipping']      = 'Nu sunt disponibile metode de livrare';
+$_['text_no_payment']       = 'Nu sunt disponibile metode de plată';
+$_['text_error_loading']    = 'Eroare la încărcare';
+$_['text_error_try_again']  = 'A apărut o eroare. Vă rugăm să încercați din nou.';
+$_['error_guest_disabled']  = 'Vă rugăm să vă autentificați pentru a finaliza comanda!';

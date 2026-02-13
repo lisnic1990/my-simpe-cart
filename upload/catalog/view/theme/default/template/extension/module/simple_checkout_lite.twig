@@ -263,7 +263,7 @@
           <div class="panel panel-default">
             <div class="panel-heading">
               <h4 class="panel-title">
-                <i class="fa fa-shopping-cart"></i> Ваш заказ
+                <i class="fa fa-shopping-cart"></i> {{ text_order_summary }}
               </h4>
             </div>
             <div class="panel-body">
@@ -326,354 +326,45 @@
 </div>
 
 <script type="text/javascript">
-(function($) {
-    'use strict';
-
-    var SimpleCheckoutLite = {
-        urls: {
-            save: '{{ action_save }}',
-            shipping: '{{ action_shipping }}',
-            payment: '{{ action_payment }}',
-            totals: '{{ action_totals }}',
-            confirm: '{{ action_confirm }}',
-            setShipping: '{{ action_set_shipping }}',
-            setPayment: '{{ action_set_payment }}',
-            zone: '{{ action_zone }}'
-        },
-        shipping_required: {{ shipping_required ? 'true' : 'false' }},
-        show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
-        show_payment_method: {{ show_payment_method ? 'true' : 'false' }},
-        require_agree: {{ agree ? 'true' : 'false' }},
-        fields: {
-            firstname: '{{ fields.firstname }}',
-            lastname: '{{ fields.lastname }}',
-            email: '{{ fields.email }}',
-            telephone: '{{ fields.telephone }}',
-            company: '{{ fields.company }}',
-            address_1: '{{ fields.address_1 }}',
-            address_2: '{{ fields.address_2 }}',
-            city: '{{ fields.city }}',
-            postcode: '{{ fields.postcode }}',
-            country: '{{ fields.country }}',
-            zone: '{{ fields.zone }}'
-        }
-    };
-
-    var SCL = {
-        init: function() {
-            this.bindEvents();
-            this.loadZones();
-            this.updateAll();
-            this.validateForm();
-        },
-
-        bindEvents: function() {
-            var self = this;
-
-            $('#simple-checkout-form').on('input change', 'input, select, textarea', function() {
-                self.validateForm();
-            });
-
-            $('#input-country').on('change', function() {
-                self.loadZones();
-                self.updateAll();
-            });
-
-            $('#input-zone, #input-address-1, #input-city, #input-postcode').on('change', function() {
-                self.updateAll();
-            });
-
-            $(document).on('change', 'input[name="shipping_method"]', function() {
-                self.setShippingMethod($(this).val());
-            });
-
-            $(document).on('change', 'input[name="payment_method"]', function() {
-                self.setPaymentMethod($(this).val());
-            });
-
-            $('#button-confirm').on('click', function() {
-                self.confirmOrder();
-            });
-        },
-
-        loadZones: function() {
-            var country_id = $('#input-country').val();
-            var zone_id = $('#input-zone').data('zone-id');
-            var $zone = $('#input-zone');
-
-            if (!country_id) {
-                if ($zone.is('select')) {
-                    $zone.html('<option value="">-- Select --</option>');
-                }
-                return;
-            }
-
-            // If zone is a hidden input, keep its default value
-            if (!$zone.is('select')) {
-                return;
-            }
-
-            $.ajax({
-                url: SimpleCheckoutLite.urls.zone + '&country_id=' + country_id,
-                dataType: 'json',
-                success: function(json) {
-                    var html = '<option value="">-- Select --</option>';
-                    if (json && json.length > 0) {
-                        for (var i = 0; i < json.length; i++) {
-                            if (json[i].zone_id == zone_id) {
-                                html += '<option value="' + json[i].zone_id + '" selected="selected">' + json[i].name + '</option>';
-                            } else {
-                                html += '<option value="' + json[i].zone_id + '">' + json[i].name + '</option>';
-                            }
-                        }
-                    }
-                    $zone.html(html);
-                }
-            });
-        },
-
-        updateAll: function() {
-            var self = this;
-            this.saveCustomerData(function() {
-                if (SimpleCheckoutLite.shipping_required && SimpleCheckoutLite.show_shipping_method) {
-                    self.loadShippingMethods(function() {
-                        if (SimpleCheckoutLite.show_payment_method) {
-                            self.loadPaymentMethods();
-                        } else {
-                            self.loadTotals();
-                        }
-                    });
-                } else if (SimpleCheckoutLite.show_payment_method) {
-                    self.loadPaymentMethods();
-                } else {
-                    self.loadTotals();
-                }
-            });
-        },
-
-        saveCustomerData: function(callback) {
-            var formData = $('#simple-checkout-form').serialize();
-            $.ajax({
-                url: SimpleCheckoutLite.urls.save,
-                type: 'POST',
-                data: formData,
-                dataType: 'json',
-                success: function(json) {
-                    $('.form-group').removeClass('has-error');
-                    $('.text-danger').remove();
-                    if (json && json.error) {
-                        for (var field in json.error) {
-                            var $input = $('#input-' + field.replace(/_/g, '-'));
-                            $input.closest('.form-group').addClass('has-error');
-                            $input.after('<div class="text-danger">' + json.error[field] + '</div>');
-                        }
-                    }
-                    if (callback) callback(json || {});
-                },
-                error: function() {
-                    if (callback) callback({error: true});
-                }
-            });
-        },
-
-        loadShippingMethods: function(callback) {
-            var $container = $('#shipping-methods');
-            $container.html('<p><i class="fa fa-spinner fa-spin"></i> Loading...</p>');
-
-            $.ajax({
-                url: SimpleCheckoutLite.urls.shipping,
-                dataType: 'json',
-                success: function(json) {
-                    if (json && json.shipping_methods) {
-                        var html = '';
-                        for (var code in json.shipping_methods) {
-                            var shipping = json.shipping_methods[code];
-                            html += '<p><strong>' + shipping.title + '</strong></p>';
-                            for (var quote_code in shipping.quote) {
-                                var quote = shipping.quote[quote_code];
-                                var value = code + '.' + quote_code;
-                                var checked = (json.shipping_selected == value) ? ' checked="checked"' : '';
-                                html += '<div class="radio"><label><input type="radio" name="shipping_method" value="' + value + '"' + checked + ' /> ' + quote.title + ' - ' + quote.text + '</label></div>';
-                            }
-                        }
-                        $container.html(html || '<p>No shipping methods available</p>');
-                    }
-                    if (callback) callback(json || {});
-                },
-                error: function() {
-                    $container.html('<p class="text-danger">Error loading shipping methods</p>');
-                    if (callback) callback({error: true});
-                }
-            });
-        },
-
-        loadPaymentMethods: function(callback) {
-            var $container = $('#payment-methods');
-            if (!$container.length) {
-                this.loadTotals();
-                if (callback) callback({});
-                return;
-            }
-            $container.html('<p><i class="fa fa-spinner fa-spin"></i> Loading...</p>');
-
-            var self = this;
-            $.ajax({
-                url: SimpleCheckoutLite.urls.payment,
-                dataType: 'json',
-                success: function(json) {
-                    if (json && json.payment_methods) {
-                        var html = '';
-                        for (var code in json.payment_methods) {
-                            var payment = json.payment_methods[code];
-                            var checked = (json.payment_selected == code) ? ' checked="checked"' : '';
-                            html += '<div class="radio"><label><input type="radio" name="payment_method" value="' + code + '"' + checked + ' /> ' + payment.title + '</label></div>';
-                        }
-                        $container.html(html || '<p>No payment methods available</p>');
-                    }
-                    if (json && json.totals) {
-                        var totalsHtml = '';
-                        for (var i = 0; i < json.totals.length; i++) {
-                            totalsHtml += '<tr><td class="text-right"><strong>' + json.totals[i].title + ':</strong></td><td class="text-right">' + json.totals[i].text + '</td></tr>';
-                        }
-                        $('#totals-table tbody').html(totalsHtml);
-                    }
-                    if (callback) callback(json || {});
-                },
-                error: function() {
-                    $container.html('<p class="text-danger">Error loading payment methods</p>');
-                    if (callback) callback({error: true});
-                }
-            });
-        },
-
-        loadTotals: function(callback) {
-            $.ajax({
-                url: SimpleCheckoutLite.urls.totals,
-                dataType: 'json',
-                success: function(json) {
-                    if (json && json.totals) {
-                        var totalsHtml = '';
-                        for (var i = 0; i < json.totals.length; i++) {
-                            totalsHtml += '<tr><td class="text-right"><strong>' + json.totals[i].title + ':</strong></td><td class="text-right">' + json.totals[i].text + '</td></tr>';
-                        }
-                        $('#totals-table tbody').html(totalsHtml);
-                    }
-                    if (callback) callback(json || {});
-                }
-            });
-        },
-
-        setShippingMethod: function(method) {
-            var self = this;
-            $.ajax({
-                url: SimpleCheckoutLite.urls.setShipping,
-                type: 'POST',
-                data: { shipping_method: method },
-                dataType: 'json',
-                success: function(json) {
-                    if (json && json.success) self.loadPaymentMethods();
-                }
-            });
-        },
-
-        setPaymentMethod: function(method) {
-            $.ajax({
-                url: SimpleCheckoutLite.urls.setPayment,
-                type: 'POST',
-                data: { payment_method: method },
-                dataType: 'json'
-            });
-        },
-
-        validateForm: function() {
-            var isValid = true;
-            var fields = SimpleCheckoutLite.fields;
-
-            if (fields.firstname === 'required') {
-                var val = $('#input-firstname').val();
-                if (!val || val.trim().length < 1) isValid = false;
-            }
-            if (fields.lastname === 'required') {
-                var val = $('#input-lastname').val();
-                if (!val || val.trim().length < 1) isValid = false;
-            }
-            if (fields.email === 'required') {
-                var val = $('#input-email').val();
-                if (!val || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) isValid = false;
-            }
-            if (fields.telephone === 'required') {
-                var val = $('#input-telephone').val();
-                if (!val || val.trim().length < 3) isValid = false;
-            }
-            if (fields.address_1 === 'required') {
-                var val = $('#input-address-1').val();
-                if (!val || val.trim().length < 3) isValid = false;
-            }
-            if (fields.city === 'required') {
-                var val = $('#input-city').val();
-                if (!val || val.trim().length < 2) isValid = false;
-            }
-            if (fields.postcode === 'required') {
-                var val = $('#input-postcode').val();
-                if (!val || val.trim().length < 2) isValid = false;
-            }
-            if (fields.country === 'required') {
-                if (!$('#input-country').val()) isValid = false;
-            }
-            if (fields.zone === 'required') {
-                if (!$('#input-zone').val()) isValid = false;
-            }
-            if (SimpleCheckoutLite.require_agree) {
-                if (!$('input[name="agree"]').is(':checked')) isValid = false;
-            }
-
-            $('#button-confirm').prop('disabled', !isValid);
-            return isValid;
-        },
-
-        confirmOrder: function() {
-            var self = this;
-            var $btn = $('#button-confirm');
-
-            if (!this.validateForm()) return;
-
-            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
-
-            this.saveCustomerData(function(saveJson) {
-                if (saveJson && saveJson.error && typeof saveJson.error === 'object') {
-                    $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
-                    self.validateForm();
-                    return;
-                }
-
-                $.ajax({
-                    url: SimpleCheckoutLite.urls.confirm,
-                    type: 'POST',
-                    data: $('#simple-checkout-form').serialize(),
-                    dataType: 'json',
-                    success: function(json) {
-                        if (json && json.redirect) {
-                            location = json.redirect;
-                        } else if (json && json.error) {
-                            alert(json.error);
-                            $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
-                            self.validateForm();
-                        }
-                    },
-                    error: function() {
-                        alert('An error occurred. Please try again.');
-                        $btn.html('<i class="fa fa-check"></i> {{ button_confirm }}');
-                        self.validateForm();
-                    }
-                });
-            });
-        }
-    };
-
-    $(document).ready(function() {
-        SCL.init();
-    });
-
-})(jQuery);
+var SimpleCheckoutLite = {
+    urls: {
+        save: '{{ action_save }}',
+        shipping: '{{ action_shipping }}',
+        payment: '{{ action_payment }}',
+        totals: '{{ action_totals }}',
+        confirm: '{{ action_confirm }}',
+        setShipping: '{{ action_set_shipping }}',
+        setPayment: '{{ action_set_payment }}',
+        zone: '{{ action_zone }}'
+    },
+    shipping_required: {{ shipping_required ? 'true' : 'false' }},
+    show_shipping_method: {{ show_shipping_method ? 'true' : 'false' }},
+    show_payment_method: {{ show_payment_method ? 'true' : 'false' }},
+    require_agree: {{ agree ? 'true' : 'false' }},
+    fields: {
+        firstname: '{{ fields.firstname }}',
+        lastname: '{{ fields.lastname }}',
+        email: '{{ fields.email }}',
+        telephone: '{{ fields.telephone }}',
+        company: '{{ fields.company }}',
+        address_1: '{{ fields.address_1 }}',
+        address_2: '{{ fields.address_2 }}',
+        city: '{{ fields.city }}',
+        postcode: '{{ fields.postcode }}',
+        country: '{{ fields.country }}',
+        zone: '{{ fields.zone }}'
+    },
+    text: {
+        loading: '{{ text_loading }}',
+        select_option: '{{ text_select_option }}',
+        processing: '{{ text_processing }}',
+        button_confirm: '{{ button_confirm }}',
+        no_shipping: '{{ text_no_shipping }}',
+        no_payment: '{{ text_no_payment }}',
+        error_loading: '{{ text_error_loading }}',
+        error_try_again: '{{ text_error_try_again }}'
+    }
+};
 </script>
+<script type="text/javascript" src="catalog/view/javascript/simple_checkout_lite.js"></script>
 {{ footer }}

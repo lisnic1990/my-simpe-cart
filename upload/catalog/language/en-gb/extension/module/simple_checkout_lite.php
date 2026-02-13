@@ -56,3 +56,13 @@ $_['error_guest']           = 'Warning: Customer information required!';
 // Totals (fallback)
 $_['text_sub_total']        = 'Sub-Total';
 $_['text_total']            = 'Total';
+
+// JS text (used in external JS via config)
+$_['text_order_summary']    = 'Your Order';
+$_['text_select_option']    = '-- Select --';
+$_['text_processing']       = 'Processing...';
+$_['text_no_shipping']      = 'No shipping methods available';
+$_['text_no_payment']       = 'No payment methods available';
+$_['text_error_loading']    = 'Error loading';
+$_['text_error_try_again']  = 'An error occurred. Please try again.';
+$_['error_guest_disabled']  = 'Please login to checkout!';

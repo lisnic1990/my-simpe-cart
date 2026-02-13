@@ -12,6 +12,13 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             return;
         }
 
+        // Check guest checkout permission
+        if (!$this->config->get('module_simple_checkout_lite_guest') && !$this->customer->isLogged()) {
+            $this->session->data['redirect'] = $this->url->link('extension/module/simple_checkout_lite', '', true);
+            $this->response->redirect($this->url->link('account/login', '', true));
+            return;
+        }
+
         // Check cart has products
         if (!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) {
             $this->response->redirect($this->url->link('checkout/cart', '', true));
@@ -182,6 +189,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         $data['button_confirm'] = $this->language->get('button_confirm');
 
+        $data['text_order_summary'] = $this->language->get('text_order_summary');
+        $data['text_select_option'] = $this->language->get('text_select_option');
+        $data['text_processing'] = $this->language->get('text_processing');
+        $data['text_no_shipping'] = $this->language->get('text_no_shipping');
+        $data['text_no_payment'] = $this->language->get('text_no_payment');
+        $data['text_error_loading'] = $this->language->get('text_error_loading');
+        $data['text_error_try_again'] = $this->language->get('text_error_try_again');
+
         $data['agree'] = $this->config->get('config_checkout_id');
 
         // Cart products for display
@@ -267,6 +282,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         $this->load->language('extension/module/simple_checkout_lite');
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+            // Check guest checkout permission
+            if (!$this->config->get('module_simple_checkout_lite_guest') && !$this->customer->isLogged()) {
+                $json['error'] = $this->language->get('error_guest_disabled');
+                $this->response->addHeader('Content-Type: application/json');
+                $this->response->setOutput(json_encode($json));
+                return;
+            }
+
             // Get POST values with defaults
             $firstname = isset($this->request->post['firstname']) ? trim($this->request->post['firstname']) : '';
             $lastname = isset($this->request->post['lastname']) ? trim($this->request->post['lastname']) : '';
@@ -672,6 +695,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
         $this->load->language('checkout/checkout');
         $this->load->language('extension/module/simple_checkout_lite');
+
+        // Check guest checkout permission
+        if (!$this->config->get('module_simple_checkout_lite_guest') && !$this->customer->isLogged()) {
+            $json['redirect'] = $this->url->link('account/login', '', true);
+            $this->response->addHeader('Content-Type: application/json');
+            $this->response->setOutput(json_encode($json));
+            return;
+        }
 
         // Validate cart
         if (!$this->cart->hasProducts() && empty($this->session->data['vouchers'])) {

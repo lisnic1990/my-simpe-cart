@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.5.2
+**Версия:** 1.6.0
 
 ## Architecture
 
@@ -21,11 +21,13 @@ upload/
 ├── catalog/
 │   ├── controller/extension/module/simple_checkout_lite.php
 │   ├── language/{ru-ru,en-gb,ro-ro}/extension/module/simple_checkout_lite.php
-│   └── view/theme/
-│       ├── default/template/extension/module/simple_checkout_lite.twig
-│       └── unishop2_free/template/extension/module/
-│           ├── simple_checkout_lite.twig      # Основной шаблон чекаута
-│           └── simple_checkout_lite_pay.twig  # Страница оплаты
+│   └── view/
+│       ├── javascript/simple_checkout_lite.js  # Unified JS (shared by all themes)
+│       └── theme/
+│           ├── default/template/extension/module/simple_checkout_lite.twig
+│           └── unishop2_free/template/extension/module/
+│               ├── simple_checkout_lite.twig      # Основной шаблон чекаута
+│               └── simple_checkout_lite_pay.twig  # Страница оплаты
 ```
 
 ### Key Components
@@ -43,8 +45,15 @@ upload/
 - `autoSelectShippingMethod()` - Auto-select shipping when step is disabled
 - Order creation logic
 
+**Unified JavaScript** (`catalog/view/javascript/simple_checkout_lite.js`):
+- Shared by both `default` and `unishop2_free` templates
+- Reads config from global `SimpleCheckoutLite` object defined inline in each template
+- Includes `escapeHtml()` for XSS prevention and `debounce()` for AJAX throttling
+- All UI strings come from `SimpleCheckoutLite.text.*` (localized via language files)
+- Fallback: loads totals separately when payment endpoint returns error
+
 **Templates** (`catalog/view/theme/unishop2_free/template/extension/module/`):
-- Embedded JavaScript (no external JS file) for proper variable initialization
+- Define `SimpleCheckoutLite` config object inline, then include external JS file
 - Flex-based form layout with `.form-row` / `.form-col` classes
 - Product list display in sidebar with images, options, prices
 - Custom styled checkboxes, buttons matching unishop2_free theme
@@ -127,6 +136,15 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Default country/zone pre-selection for local stores
 
 ## Changelog
+
+### 1.6.0
+- Refactored: Unified JavaScript into single external file (`catalog/view/javascript/simple_checkout_lite.js`), eliminating ~1100 lines of duplicated inline JS across templates
+- Security: Added `escapeHtml()` to all dynamic HTML rendering (zone names, error messages, shipping/payment titles, totals) to prevent XSS
+- Security: Added server-side guest checkout validation in `index()`, `save()`, and `confirm()` methods — redirects unauthenticated users when guest checkout is disabled
+- Fixed: Totals stuck on "Loading..." when payment endpoint returns error (added fallback to separate `/totals` endpoint)
+- Added: AJAX debounce (500ms) on address field changes to reduce unnecessary server requests
+- Added: Localized all JS strings via template config object (`text_order_summary`, `text_select_option`, `text_processing`, `text_no_shipping`, `text_no_payment`, `text_error_loading`, `text_error_try_again`, `error_guest_disabled`)
+- Removed: All `console.log`/`console.error` calls from production code
 
 ### 1.5.2
 - Fixed: Label alignment in checkout forms - labels were right-aligned due to Bootstrap 3 `form-horizontal` + `control-label` combination

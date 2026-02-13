@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git -C \"D:\\\\Work\\\\MyOCMODs\\\\My Simpe Cart\" log --oneline -20)"
     ]
   }
 }
