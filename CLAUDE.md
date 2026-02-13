@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Simple Checkout Lite** - модуль упрощенного оформления заказа (One Page Checkout) для ocStore 3.0.3.7 с интеграцией темы unishop2_free.
 
-**Версия:** 1.6.0
+**Версия:** 1.6.1
 
 ## Architecture
 
@@ -136,6 +136,12 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Default country/zone pre-selection for local stores
 
 ## Changelog
+
+### 1.6.1
+- Fixed: Tag Manager (GA4/Facebook Pixel) Purchase event not firing on checkout/success — `addOrderHistory()` triggers Tag Manager event that sets `analytics_tracking.hit=1` prematurely; added `resetAnalyticsHit()` to reset `hit=0` before redirect in all order confirmation branches (`confirm()` and `pay()`)
+- Added: `autoSelectPaymentMethod()` — auto-selects default or first available payment method when payment step is disabled
+- Added: Tag Manager session/cookie compatibility (`session['tm_order_id']`, `gtm_orderid` cookie) for analytics tracking
+- Safety: All Tag Manager compatibility code wrapped in try-catch — module works correctly even if Tag Manager is uninstalled
 
 ### 1.6.0
 - Refactored: Unified JavaScript into single external file (`catalog/view/javascript/simple_checkout_lite.js`), eliminating ~1100 lines of duplicated inline JS across templates
