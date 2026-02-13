@@ -131,7 +131,7 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Responsive design (mobile-friendly)
 - Product list with thumbnails in order summary
 - Auto-select shipping/payment when steps are disabled
-- Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly
+- Simple payment methods (cod, free_checkout, cheque, bank_transfer) confirm directly using each method's configured `order_status_id`
 - Client-side form validation - confirm button disabled until required fields filled
 - Default country/zone pre-selection for local stores
 
@@ -142,6 +142,9 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Security: Added `escapeHtml()` to all dynamic HTML rendering (zone names, error messages, shipping/payment titles, totals) to prevent XSS
 - Security: Added server-side guest checkout validation in `index()`, `save()`, and `confirm()` methods — redirects unauthenticated users when guest checkout is disabled
 - Fixed: Totals stuck on "Loading..." when payment endpoint returns error (added fallback to separate `/totals` endpoint)
+- Fixed: `pay()` and `confirm()` now use payment method's own `order_status_id` (e.g. `payment_cod_order_status_id`) instead of generic `config_order_status_id`
+- Fixed: `save()` no longer sets `session['guest']` for logged-in users (was overwriting session incorrectly)
+- Fixed: `save()` now sets `session['account'] = 'guest'` for guest checkout (required by some payment extensions)
 - Added: AJAX debounce (500ms) on address field changes to reduce unnecessary server requests
 - Added: Localized all JS strings via template config object (`text_order_summary`, `text_select_option`, `text_processing`, `text_no_shipping`, `text_no_payment`, `text_error_loading`, `text_error_try_again`, `error_guest_disabled`)
 - Removed: All `console.log`/`console.error` calls from production code

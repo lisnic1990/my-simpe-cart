@@ -374,15 +374,19 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             }
 
             if (!isset($json['error'])) {
-                // Save to session as guest
-                $this->session->data['guest'] = array(
-                    'customer_group_id' => $this->config->get('config_customer_group_id'),
-                    'firstname'         => $firstname,
-                    'lastname'          => $lastname,
-                    'email'             => $email,
-                    'telephone'         => $telephone,
-                    'custom_field'      => array()
-                );
+                // Save guest data to session (only for non-logged users)
+                if (!$this->customer->isLogged()) {
+                    $this->session->data['account'] = 'guest';
+
+                    $this->session->data['guest'] = array(
+                        'customer_group_id' => $this->config->get('config_customer_group_id'),
+                        'firstname'         => $firstname,
+                        'lastname'          => $lastname,
+                        'email'             => $email,
+                        'telephone'         => $telephone,
+                        'custom_field'      => array()
+                    );
+                }
 
                 $company = isset($this->request->post['company']) ? trim($this->request->post['company']) : '';
                 $address_2 = isset($this->request->post['address_2']) ? trim($this->request->post['address_2']) : '';
@@ -1038,7 +1042,16 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             // If payment step is disabled, confirm order directly
             if (!$this->config->get('module_simple_checkout_lite_step_payment_method') || !isset($this->session->data['payment_method'])) {
-                $this->model_checkout_order->addOrderHistory($order_id, $this->config->get('config_order_status_id'));
+                // Use payment method's configured status if available, fall back to store default
+                $confirm_status_id = $this->config->get('config_order_status_id');
+                if (isset($this->session->data['payment_method']['code'])) {
+                    $method_status = $this->config->get('payment_' . $this->session->data['payment_method']['code'] . '_order_status_id');
+                    if ($method_status) {
+                        $confirm_status_id = $method_status;
+                    }
+                }
+
+                $this->model_checkout_order->addOrderHistory($order_id, $confirm_status_id);
                 $json['redirect'] = $this->url->link('checkout/success', '', true);
             } else {
                 // Go to payment page
@@ -1067,7 +1080,14 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             if (in_array($code, $simple_payments)) {
                 $this->load->model('checkout/order');
-                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
+
+                // Use payment method's own configured order status, fall back to store default
+                $order_status_id = $this->config->get('payment_' . $code . '_order_status_id');
+                if (!$order_status_id) {
+                    $order_status_id = $this->config->get('config_order_status_id');
+                }
+
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id);
 
                 $this->response->redirect($this->url->link('checkout/success', '', true));
                 return;
@@ -1104,7 +1124,13 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             } else {
                 // No payment form, confirm order directly
                 $this->load->model('checkout/order');
-                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
+
+                $order_status_id = $this->config->get('payment_' . $code . '_order_status_id');
+                if (!$order_status_id) {
+                    $order_status_id = $this->config->get('config_order_status_id');
+                }
+
+                $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id);
 
                 $this->response->redirect($this->url->link('checkout/success', '', true));
             }
