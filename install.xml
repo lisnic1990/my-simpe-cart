@@ -52,10 +52,9 @@
 
     <!-- Добавление пункта меню в админку -->
     <file path="admin/controller/common/column_left.php">
-        <!-- Вариант 1: array() синтаксис -->
         <operation error="skip">
-            <search><![CDATA[$data['menus'] = array();]]></search>
-            <add position="after"><![CDATA[
+            <search><![CDATA[return $this->load->view('common/column_left', $data);]]></search>
+            <add position="before"><![CDATA[
 
         // Simple Checkout Lite menu
         if ($this->user->hasPermission('access', 'extension/module/simple_checkout_lite')) {
@@ -67,25 +66,8 @@
                 'children' => array()
             );
         }
+        
 ]]></add>
-        </operation>
-        <!-- Вариант 2: [] короткий синтаксис -->
-        <operation error="skip">
-            <search><![CDATA[$data['menus'] = [];]]></search>
-            <add position="after"><![CDATA[
-
-        // Simple Checkout Lite menu
-        if ($this->user->hasPermission('access', 'extension/module/simple_checkout_lite')) {
-            $data['menus'][] = array(
-                'id'       => 'menu-simple-checkout-lite',
-                'icon'     => 'fa-shopping-cart',
-                'name'     => 'Simple Checkout',
-                'href'     => $this->url->link('extension/module/simple_checkout_lite', 'user_token=' . $this->session->data['user_token'], true),
-                'children' => array()
-            );
-        }
-]]></add>
-        </operation>
     </file>
 
 </modification>
