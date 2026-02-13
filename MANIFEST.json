@@ -1,0 +1,12 @@
+{
+  "latest": {
+    "filename": "ocstore-main-20260213_131727-c88548c.zip",
+    "branch": "main",
+    "commit": "c88548c7c2cbea65fb48792afa8f9fa6be217a59",
+    "short_sha": "c88548c",
+    "timestamp": "20260213_131727",
+    "date": "2026-02-13 13:17:27",
+    "author": "lisnic1990",
+    "message": "fixed syntaxis in create-release"
+  }
+}
