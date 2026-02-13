@@ -147,6 +147,7 @@ The module includes templates for both `default` and `unishop2_free` themes. The
 - Fixed: `save()` now sets `session['account'] = 'guest'` for guest checkout (required by some payment extensions)
 - Added: AJAX debounce (500ms) on address field changes to reduce unnecessary server requests
 - Added: Localized all JS strings via template config object (`text_order_summary`, `text_select_option`, `text_processing`, `text_no_shipping`, `text_no_payment`, `text_error_loading`, `text_error_try_again`, `error_guest_disabled`)
+- Fixed: Order total always zero in database — `$total_data` array must use `&` references (`&$totals`, `&$taxes`, `&$total`) because OpenCart's Proxy `__call` cannot preserve pass-by-reference semantics (fixed in `payment()`, `confirm()`, and `getTotalsHtml()`)
 - Removed: All `console.log`/`console.error` calls from production code
 
 ### 1.5.2

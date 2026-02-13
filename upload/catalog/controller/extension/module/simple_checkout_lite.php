@@ -532,11 +532,15 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             }
 
             if (!isset($json['error'])) {
-                // Totals
+                // Totals - use references because __call can not keep var references
+                $totals = array();
+                $taxes = $this->cart->getTaxes();
+                $total = 0;
+
                 $total_data = array(
-                    'totals' => array(),
-                    'taxes'  => $this->cart->getTaxes(),
-                    'total'  => 0
+                    'totals' => &$totals,
+                    'taxes'  => &$taxes,
+                    'total'  => &$total
                 );
 
                 $this->load->model('setting/extension');
@@ -757,6 +761,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             if (!isset($this->session->data['payment_method'])) {
                 $json['error'] = $this->language->get('error_payment');
             }
+        } else {
+            // Auto-select payment method if step is disabled
+            if (!isset($this->session->data['payment_method'])) {
+                $this->autoSelectPaymentMethod();
+            }
         }
 
         // Validate guest/payment_address
@@ -783,10 +792,15 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         if (!isset($json['error'])) {
             $order_data = array();
 
+            // Totals - use references because Proxy __call can not keep var references
+            $totals = array();
+            $taxes = $this->cart->getTaxes();
+            $total = 0;
+
             $total_data = array(
-                'totals' => array(),
-                'taxes'  => $this->cart->getTaxes(),
-                'total'  => 0
+                'totals' => &$totals,
+                'taxes'  => &$taxes,
+                'total'  => &$total
             );
 
             $this->load->model('setting/extension');
@@ -811,9 +825,6 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                     }
                 }
             }
-
-            $totals = $total_data['totals'];
-            $total = $total_data['total'];
 
             $sort_order = array();
 
@@ -1038,6 +1049,9 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             $order_id = $this->model_checkout_order->addOrder($order_data);
 
+            // log writer for testing $order_data:
+            $this->log->write('Order Data: ' . print_r($order_data, true));
+
             $this->session->data['order_id'] = $order_id;
 
             // If payment step is disabled, confirm order directly
@@ -1178,14 +1192,96 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         }
     }
 
+    private function autoSelectPaymentMethod() {
+        // If payment methods already in session, select default or first
+        if (isset($this->session->data['payment_methods']) && $this->session->data['payment_methods']) {
+            $default_payment = $this->config->get('module_simple_checkout_lite_payment_default');
+
+            if ($default_payment && isset($this->session->data['payment_methods'][$default_payment])) {
+                $this->session->data['payment_method'] = $this->session->data['payment_methods'][$default_payment];
+                return;
+            }
+
+            foreach ($this->session->data['payment_methods'] as $method) {
+                $this->session->data['payment_method'] = $method;
+                return;
+            }
+        }
+
+        // If no payment methods in session, try to load them
+        if (isset($this->session->data['payment_address'])) {
+            $this->load->model('setting/extension');
+
+            $totals = array();
+            $taxes = $this->cart->getTaxes();
+            $total = 0;
+
+            $total_data = array(
+                'totals' => &$totals,
+                'taxes'  => &$taxes,
+                'total'  => &$total
+            );
+
+            $results = $this->model_setting_extension->getExtensions('total');
+
+            foreach ($results as $result) {
+                if ($this->config->get('total_' . $result['code'] . '_status')) {
+                    $this->load->model('extension/total/' . $result['code']);
+                    $this->{'model_extension_total_' . $result['code']}->getTotal($total_data);
+                }
+            }
+
+            $method_data = array();
+            $results = $this->model_setting_extension->getExtensions('payment');
+            $recurring = $this->cart->hasRecurringProducts();
+
+            foreach ($results as $result) {
+                if ($this->config->get('payment_' . $result['code'] . '_status')) {
+                    $this->load->model('extension/payment/' . $result['code']);
+                    $method = $this->{'model_extension_payment_' . $result['code']}->getMethod($this->session->data['payment_address'], $total);
+
+                    if ($method) {
+                        if ($recurring) {
+                            if (property_exists($this->{'model_extension_payment_' . $result['code']}, 'recurringPayments') && $this->{'model_extension_payment_' . $result['code']}->recurringPayments()) {
+                                $method_data[$result['code']] = $method;
+                            }
+                        } else {
+                            $method_data[$result['code']] = $method;
+                        }
+                    }
+                }
+            }
+
+            if ($method_data) {
+                $this->session->data['payment_methods'] = $method_data;
+
+                $default_payment = $this->config->get('module_simple_checkout_lite_payment_default');
+
+                if ($default_payment && isset($method_data[$default_payment])) {
+                    $this->session->data['payment_method'] = $method_data[$default_payment];
+                } else {
+                    foreach ($method_data as $method) {
+                        $this->session->data['payment_method'] = $method;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Get totals HTML (AJAX helper)
      */
     private function getTotalsHtml() {
+        // Use references because Proxy __call can not keep var references
+        $totals = array();
+        $taxes = $this->cart->getTaxes();
+        $total = 0;
+
         $total_data = array(
-            'totals' => array(),
-            'taxes'  => $this->cart->getTaxes(),
-            'total'  => 0
+            'totals' => &$totals,
+            'taxes'  => &$taxes,
+            'total'  => &$total
         );
 
         // Make sure currency is set
