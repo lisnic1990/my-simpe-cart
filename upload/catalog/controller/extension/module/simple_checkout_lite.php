@@ -1049,10 +1049,12 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
             $order_id = $this->model_checkout_order->addOrder($order_data);
 
-            // log writer for testing $order_data:
-            $this->log->write('Order Data: ' . print_r($order_data, true));
-
             $this->session->data['order_id'] = $order_id;
+
+            // Tag Manager / analytics compatibility - set tm_order_id and cookie before redirect
+            $this->session->data['tm_order_id'] = $order_id;
+            setcookie('gtm_orderid', $order_id, time() + 600, '/', '', isset($_SERVER['HTTPS']), true);
+            $_COOKIE['gtm_orderid'] = $order_id;
 
             // If payment step is disabled, confirm order directly
             if (!$this->config->get('module_simple_checkout_lite_step_payment_method') || !isset($this->session->data['payment_method'])) {
@@ -1066,6 +1068,10 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 }
 
                 $this->model_checkout_order->addOrderHistory($order_id, $confirm_status_id);
+
+                // Tag Manager compatibility: reset hit=0 before redirect
+                $this->resetAnalyticsHit($order_id);
+
                 $json['redirect'] = $this->url->link('checkout/success', '', true);
             } else {
                 // Go to payment page
@@ -1086,6 +1092,11 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
             return;
         }
 
+        // Tag Manager / analytics compatibility
+        $this->session->data['tm_order_id'] = $this->session->data['order_id'];
+        setcookie('gtm_orderid', $this->session->data['order_id'], time() + 600, '/', '', isset($_SERVER['HTTPS']), true);
+        $_COOKIE['gtm_orderid'] = $this->session->data['order_id'];
+
         if (isset($this->session->data['payment_method']['code'])) {
             $code = $this->session->data['payment_method']['code'];
 
@@ -1102,6 +1113,9 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
                 }
 
                 $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id);
+
+                // Tag Manager compatibility: reset hit=0 before redirect
+                $this->resetAnalyticsHit($this->session->data['order_id']);
 
                 $this->response->redirect($this->url->link('checkout/success', '', true));
                 return;
@@ -1146,11 +1160,17 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
 
                 $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $order_status_id);
 
+                // Tag Manager compatibility: reset hit=0 before redirect
+                $this->resetAnalyticsHit($this->session->data['order_id']);
+
                 $this->response->redirect($this->url->link('checkout/success', '', true));
             }
         } else {
             $this->load->model('checkout/order');
             $this->model_checkout_order->addOrderHistory($this->session->data['order_id'], $this->config->get('config_order_status_id'));
+
+            // Tag Manager compatibility: reset hit=0 before redirect
+            $this->resetAnalyticsHit($this->session->data['order_id']);
 
             $this->response->redirect($this->url->link('checkout/success', '', true));
         }
@@ -1369,5 +1389,22 @@ class ControllerExtensionModuleSimpleCheckoutLite extends Controller {
         }
 
         return $data;
+    }
+
+    /**
+     * Reset analytics_tracking hit flag so Tag Manager Purchase event fires on checkout/success.
+     * addOrderHistory() triggers Tag Manager event that sets hit=1 prematurely.
+     */
+    private function resetAnalyticsHit($order_id) {
+        try {
+            $result = $this->db->query("SELECT * FROM `" . DB_PREFIX . "analytics_tracking` WHERE order_id = '" . (int)$order_id . "'");
+            if ($result->num_rows) {
+                $this->db->query("UPDATE `" . DB_PREFIX . "analytics_tracking` SET hit = '0' WHERE order_id = '" . (int)$order_id . "'");
+            } else {
+                $this->db->query("INSERT INTO `" . DB_PREFIX . "analytics_tracking` SET order_id = '" . (int)$order_id . "', hit = '0'");
+            }
+        } catch (\Exception $e) {
+            // Tag Manager module not installed — table may not exist, skip silently
+        }
     }
 }
