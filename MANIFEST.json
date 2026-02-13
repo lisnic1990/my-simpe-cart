@@ -1,0 +1,14 @@
+{
+  "latest": {
+    "filename": "simple_checkout_lite_v1.7.0.ocmod.zip",
+    "module_code": "simple_checkout_lite",
+    "version": "1.7.0",
+    "branch": "main",
+    "commit": "6ea874443a5dc5b5597f2275ea8ba4e7d6b90f53",
+    "short_sha": "6ea8744",
+    "timestamp": "20260213_134851",
+    "date": "2026-02-13 13:48:51",
+    "author": "lisnic1990",
+    "message": "Release v1.1.0"
+  }
+}

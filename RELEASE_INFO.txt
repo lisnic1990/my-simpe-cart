@@ -1,0 +1,14 @@
+OCMOD Release Package
+=====================
+
+Module: simple_checkout_lite
+Version: 1.7.0
+Archive: simple_checkout_lite_v1.7.0.ocmod.zip
+
+Build Information:
+Branch: main
+Commit: 6ea874443a5dc5b5597f2275ea8ba4e7d6b90f53
+Short SHA: 6ea8744
+Author: lisnic1990
+Date: 2026-02-13 13:48:51
+Message: Release v1.1.0
